@@ -1,6 +1,28 @@
 <html>
-    <head></head>
+    <head>
+        <style>
+            html, body { width: 100vw; height: 100vh; overflow: hidden; }
+            body { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+            canvas {
+                width: 700px;
+                aspect-ratio: 1;
+                border: 1px solid black;
+                box-shadow: 10px 10px 0 0 black;
+            }
+        </style>
+    </head>
     <body>
         <h1>Test</h1>
+        <canvas width="700" height="700"></canvas>
     </body>
+    <script>
+        const canvas = document.querySelector('canvas')
+        const ctx = canvas.getContext("2d")
+
+        ctx.fillStyle = "rgb(200 0 0)";
+        ctx.fillRect(10, 10, 50, 50);
+
+        ctx.fillStyle = "rgb(0 0 200 / 50%)";
+        ctx.fillRect(30, 30, 50, 50);
+    </script>
 </html>
