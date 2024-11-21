@@ -1,75 +1,9 @@
 <html>
     <head>
-        <style>
-            html, body { width: 100vw; height: 100vh; overflow: hidden; }
-            body { display: flex; flex-direction: column; justify-content: center; align-items: center; }
-            canvas {
-                width: 700px;
-                aspect-ratio: 1;
-                border: 1px solid black;
-                box-shadow: 10px 10px 0 0 black;
-            }
-        </style>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1>Test</h1>
         <canvas width="700" height="700"></canvas>
     </body>
-    <script>
-
-        const objs = {
-            field: {
-                xsize: 10,
-                ysize: 10
-            },
-            objects: [{
-                bgColor: "rgb(200 0 0)",
-                fgColor: 'lime',
-                rect: { x: 4, y: 6, w: 3, h: 2 },
-                text: 'A'
-            }, {
-                bgColor: "rgb(0 0 200 / 50%)",
-                fgColor: 'yellow',
-                rect: { x: 3, y: 4, w: 2, h: 3 },
-                text: 'B'
-            }]
-        }
-
-        let draw = (definition) => {
-            const canvas = document.querySelector('canvas')
-            const ctx = canvas.getContext("2d")
-
-            const rect = canvas.getBoundingClientRect()
-            const xpx = rect.width / definition.field.xsize
-            const ypx = rect.height / definition.field.xsize
-
-            definition.objects.forEach(obj => {
-                ctx.fillStyle = obj.bgColor;
-                const fromx = xpx * obj.rect.x
-                const sizex = xpx * obj.rect.w
-                const fromy = ypx * obj.rect.y
-                const sizey = ypx * obj.rect.h
-
-                if (obj.bgColor) {
-                    ctx.fillRect(fromx, fromy, sizex, sizey)
-                    console.log(`Drawing rect ${fromx}, ${fromy}, ${sizex}, ${sizey}`)
-                }
-
-                if (obj.text) {
-                    ctx.fillStyle = obj.fgColor;
-                    const tx = fromx + sizex/2
-                    const ty = fromy + sizey/2
-                    ctx.fillText(obj.text, tx, ty)
-                    console.log(`Writing text "${obj.text}" at ${tx}, ${ty}`)
-                }
-                
-            })
-            // ctx.fillStyle = "rgb(200 0 0)";
-            // ctx.fillRect(10, 10, 50, 50);
-
-            // ctx.fillStyle = "rgb(0 0 200 / 50%)";
-            // ctx.fillRect(30, 30, 50, 50);
-        }
-        draw(objs)
-    </script>
+    <script src="/main.js"></script>
 </html>

@@ -1,0 +1,19 @@
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    width: 700px;
+    aspect-ratio: 1;
+    border: 1px solid black;
+    box-shadow: 10px 10px 0 0 black;
+}
