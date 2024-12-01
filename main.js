@@ -1,4 +1,4 @@
-const definition = {
+/* const game = {
     field: {
         xsize: 10,
         ysize: 10
@@ -17,7 +17,37 @@ const definition = {
         text: 'B',
         events: [ 'click' ]
     }]
+} */
+
+
+const createDefinitionForFlipGame = () => {
+    let obj = {
+        field: {
+            xsize: 10,
+            ysize: 10
+        },
+        objects: []
+    }
+    let lightUp = 'hsl(0, 0%, 80%)'
+    let lightDown = "hsl(0, 0%, 20%)"
+    for(let i = 0; i < 10; i++) {
+        for(let j = 0; j < 10; j++) {
+            let b = Math.random() > .5
+            obj.objects.push({
+                id: i*10 + j,
+                bgColor: b ? lightUp : lightDown,
+                fgColor: b ? 'black' : 'white',
+                rect: { x: i, y: j, w: 1, h: 1 },
+                text: b ? '⧳' : '⧲',
+                events: [ 'click' ],
+                internalData: b
+            })
+        }
+    }
+    return obj
 }
+
+let game = createDefinitionForFlipGame()
 
 let xpx = 0
 let ypx = 0
@@ -26,12 +56,13 @@ let draw = () => {
     const canvas = document.querySelector('canvas')
     if (!canvas) return
     const ctx = canvas.getContext("2d")
+    ctx.font = "20px Arial";
 
     const rect = canvas.getBoundingClientRect()
-    xpx = rect.width / definition.field.xsize
-    ypx = rect.height / definition.field.xsize
+    xpx = rect.width / game.field.xsize
+    ypx = rect.height / game.field.xsize
 
-    definition.objects.forEach(obj => {
+    game.objects.forEach(obj => {
         ctx.fillStyle = obj.bgColor;
         const fromx = xpx * obj.rect.x
         const sizex = xpx * obj.rect.w
@@ -40,17 +71,17 @@ let draw = () => {
 
         if (obj.bgColor) {
             ctx.fillRect(fromx, fromy, sizex, sizey)
-            console.log(`Drawing rect ${fromx}, ${fromy}, ${sizex}, ${sizey}`)
+            // console.log(`Drawing rect ${fromx}, ${fromy}, ${sizex}, ${sizey}`)
         }
 
         if (obj.text) {
             ctx.fillStyle = obj.fgColor;
             const tx = fromx + sizex/2
             const ty = fromy + sizey/2
-            ctx.fillText(obj.text, tx, ty)
-            console.log(`Writing text "${obj.text}" at ${tx}, ${ty}`)
+            let w = ctx.measureText(obj.text).width
+            ctx.fillText(obj.text, tx - w/2, ty + w/2)
+            // console.log(`Writing text "${obj.text}" at ${tx}, ${ty}`)
         }
-         
     })
     // ctx.fillStyle = "rgb(200 0 0)";
     // ctx.fillRect(10, 10, 50, 50);
@@ -69,7 +100,7 @@ const cellAt = (x, y) => {
 
 const objectsAt = (x, y) => {
     const cell = cellAt(x, y)
-    const collisions = definition.objects.filter(obj =>
+    const collisions = game.objects.filter(obj =>
         cell.x >= obj.rect.x &&
         cell.x < obj.rect.x + obj.rect.w &&
         cell.y >= obj.rect.y &&
@@ -89,10 +120,31 @@ let bindEvents = () => {
         const x = evt.pageX - canvasRect.left
         const y = evt.pageY - canvasRect.top
         console.log(x, y)
-        const coo = cellAt(x, y)
+        // const coo = cellAt(x, y)
         const objs = objectsAt(x, y)
         const withEvent = objs.filter(obj => (obj.events || []).includes('click'))
         console.log(objs, withEvent)
+        game = simulateServer(objs.map(o => o.id), 'click', game)
+        draw()
     })
 }
 bindEvents()
+
+
+
+
+const simulateServer = (objs, evtType, input) => {
+    console.warn('Simulating server', objs, evtType, input)
+    let output = JSON.parse(JSON.stringify(input)) // simulo una comunicazione col server quindi non modifico l'oggetto corrente, ovviamente!
+    let obj = objs
+    output.objects.forEach(o => {
+        if (o.id === obj.id) {
+            console.warn('Trovato con id ${o.id}')
+            let b = !o.internalData
+            o.bgColor = b ? lightUp : lightDown
+            o.fgColor = b ? 'black' : 'white'
+            o.text = b ? '⧳' : '⧲'
+        }
+    })
+    return output
+}
