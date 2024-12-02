@@ -19,35 +19,17 @@
     }]
 } */
 
+import { createDefinitionForFlipGame, simulateServerForFlipGame } from '/games/flip.js'
 
-const createDefinitionForFlipGame = () => {
-    let obj = {
-        field: {
-            xsize: 10,
-            ysize: 10
-        },
-        objects: []
+const gameManagement = {
+    flip: {
+        createDefinition: createDefinitionForFlipGame,
+        simulateServer: simulateServerForFlipGame
     }
-    let lightUp = 'hsl(0, 0%, 80%)'
-    let lightDown = "hsl(0, 0%, 20%)"
-    for(let i = 0; i < 10; i++) {
-        for(let j = 0; j < 10; j++) {
-            let b = Math.random() > .5
-            obj.objects.push({
-                id: i*10 + j,
-                bgColor: b ? lightUp : lightDown,
-                fgColor: b ? 'black' : 'white',
-                rect: { x: i, y: j, w: 1, h: 1 },
-                text: b ? '⧳' : '⧲',
-                events: [ 'click' ],
-                internalData: b
-            })
-        }
-    }
-    return obj
 }
+const g = gameManagement.flip
 
-let game = createDefinitionForFlipGame()
+let game = g.createDefinition()
 
 let xpx = 0
 let ypx = 0
@@ -83,6 +65,8 @@ let draw = () => {
             // console.log(`Writing text "${obj.text}" at ${tx}, ${ty}`)
         }
     })
+
+    document.querySelector('#game-status').innerHTML = `${game.info.status} (${Math.round(game.info.progression * 100)}%)`
     // ctx.fillStyle = "rgb(200 0 0)";
     // ctx.fillRect(10, 10, 50, 50);
 
@@ -124,27 +108,8 @@ let bindEvents = () => {
         const objs = objectsAt(x, y)
         const withEvent = objs.filter(obj => (obj.events || []).includes('click'))
         console.log(objs, withEvent)
-        game = simulateServer(objs.map(o => o.id), 'click', game)
+        game = g.simulateServer(objs.map(o => o.id), 'click', game)
         draw()
     })
 }
 bindEvents()
-
-
-
-
-const simulateServer = (objs, evtType, input) => {
-    console.warn('Simulating server', objs, evtType, input)
-    let output = JSON.parse(JSON.stringify(input)) // simulo una comunicazione col server quindi non modifico l'oggetto corrente, ovviamente!
-    let obj = objs
-    output.objects.forEach(o => {
-        if (o.id === obj.id) {
-            console.warn('Trovato con id ${o.id}')
-            let b = !o.internalData
-            o.bgColor = b ? lightUp : lightDown
-            o.fgColor = b ? 'black' : 'white'
-            o.text = b ? '⧳' : '⧲'
-        }
-    })
-    return output
-}
