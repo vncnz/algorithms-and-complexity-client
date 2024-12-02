@@ -46,7 +46,7 @@ export const simulateServerForFlipGame = (objs, evtType, input) => {
 
         if ((xdiff == 0 && Math.abs(ydiff) < 2) ||
             (ydiff == 0 && Math.abs(xdiff) < 2)) {
-                console.log(`${o.id} has xdiff ${xdiff} and ydiff ${ydiff} from ${obj}`)
+                // console.log(`${o.id} has xdiff ${xdiff} and ydiff ${ydiff} from ${obj}`)
             let b = !o.internalData
             o.bgColor = b ? lightUp : lightDown
             o.fgColor = b ? 'black' : 'white'
@@ -55,6 +55,9 @@ export const simulateServerForFlipGame = (objs, evtType, input) => {
         }
     })
     output.info.progression = output.objects.filter(o => !!o.internalData).length / output.objects.length
-    output.info.status = output.info.progression === 1 ? 'win' : 'running'
+    if (output.info.progression === 1) {
+        output.info.status = 'win'
+        output.objects.forEach(o => o.events = [])
+    }
     return output
 }
