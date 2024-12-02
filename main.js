@@ -20,14 +20,19 @@
 } */
 
 import { createDefinitionForFlipGame, simulateServerForFlipGame } from '/games/flip.js'
+import { createDefinitionForMinesweeperGame, simulateServerForMinesweeperGame } from '/games/minesweeper.js'
 
 const gameManagement = {
     flip: {
         createDefinition: createDefinitionForFlipGame,
         simulateServer: simulateServerForFlipGame
+    },
+    minesweeper: {
+        createDefinition: createDefinitionForMinesweeperGame,
+        simulateServer: simulateServerForMinesweeperGame
     }
 }
-const g = gameManagement.flip
+const g = gameManagement.minesweeper
 
 let game = g.createDefinition()
 
@@ -97,19 +102,27 @@ let bindEvents = () => {
     const canvas = document.querySelector('canvas')
     if (!canvas) return
 
-    let canvasRect = canvas.getBoundingClientRect()
+    let canvasRect = canvas.getBoundingClientRect();
 
-    canvas.addEventListener('click', evt => {
-        console.log('click', evt)
-        const x = evt.pageX - canvasRect.left
-        const y = evt.pageY - canvasRect.top
-        console.log(x, y)
-        // const coo = cellAt(x, y)
-        const objs = objectsAt(x, y)
-        const withEvent = objs.filter(obj => (obj.events || []).includes('click'))
-        console.log(objs, withEvent)
-        game = g.simulateServer(objs.map(o => o.id), 'click', game)
-        draw()
+    ['click', 'contextmenu'].forEach(evtType => {
+        canvas.addEventListener(evtType, evt => {
+            evt.preventDefault()
+            evt.stopImmediatePropagation()
+            console.log(evtType, evt)
+            const x = evt.pageX - canvasRect.left
+            const y = evt.pageY - canvasRect.top
+            console.log(x, y)
+            // const coo = cellAt(x, y)
+            const objs = objectsAt(x, y)
+            const withEvent = objs.filter(obj => (obj.events || []).includes(evtType))
+            console.log(evtType, objs, withEvent)
+            if (withEvent.length) {
+                game = g.simulateServer(withEvent.map(o => o.id), evtType, game)
+                draw()
+            } else {
+                console.warn('No object with this event listener here!')
+            }
+        })
     })
 }
 bindEvents()
