@@ -48,8 +48,13 @@ export const simulateServerForMinesweeperGame = (objs, evtType, input) => {
     let isMine = output.info.internalData.mines.includes(objid)
     let isLeftClick = evtType === 'contextmenu'
     if (isLeftClick) {
-        obj.text = '🏴'
-        obj.bgColor = bgFlag
+        if (obj.text === '🏴') {
+            obj.text = 'O'
+            obj.bgColor = bgGray
+        } else {
+            obj.text = '🏴'
+            obj.bgColor = bgFlag
+        }
     }
     else if (isMine) {
         obj.text = 'X'
@@ -57,7 +62,8 @@ export const simulateServerForMinesweeperGame = (objs, evtType, input) => {
         output.info.status = 'lose'
         output.objects.forEach(o => o.events = [])
     } else {
-        obj.text = '🗸' // TODO: nearby mines number
+        let c = countMines(obj.id, output)
+        obj.text = `${c}`
         obj.bgColor = bgGreen
         obj.events = []
     }
@@ -68,4 +74,36 @@ export const simulateServerForMinesweeperGame = (objs, evtType, input) => {
         output.objects.forEach(o => o.events = [])
     }
     return output
+}
+
+const getNeighbors = (id, row) => {
+    let r = Math.floor(id / row)
+    let c = id % row
+
+    const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [ 0, -1],          [ 0, 1],
+        [ 1, -1], [ 1, 0], [ 1, 1]
+    ]
+
+    return directions
+        .map(([dr, dc]) => {
+            const newRow = r + dr;
+            const newCol = c + dc;
+
+            // Calcola il nuovo id
+            return newRow >= 0 && newRow < row && newCol >= 0 && newCol < row
+                ? newRow * row + newCol
+                : null; // Fuori dai limiti
+        })
+        .filter(id => id !== null)
+}
+
+const countMines = (id, board) => {
+    let neigh = getNeighbors(id, board.field.xsize)
+    return board.objects.filter(o => {
+        let isNeigh = neigh.includes(o.id)
+        let isMine = board.info.internalData.mines.includes(o.id)
+        return isMine && isNeigh
+    }).length
 }
