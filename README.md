@@ -11,6 +11,7 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 - [x] IMPL: add local events to json
 - [x] GAME: Flip game
 - [x] GAME: Minesweeper game
+- [ ] Definire una doppia modalità griglia / disegno libero
 - [ ] GAME: Towers
 - [ ] GAME: Range
 - [ ] GAME: Same game
