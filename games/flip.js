@@ -1,35 +1,37 @@
 export const createDefinitionForFlipGame = () => {
     let sz = 4
-    let obj = {
+    let game = {
         field: {
             xsize: sz,
             ysize: sz
         },
-        info: {
+        playStatus: {
             status: 'running',
             progression: 0
         },
-        objects: []
+        objects: {},
+        events: {}
     }
     let lightUp = 'hsl(0, 0%, 80%)'
     let lightDown = "hsl(0, 0%, 20%)"
     for(let i = 0; i < sz; i++) {
         for(let j = 0; j < sz; j++) {
             let b = Math.random() > .5
-            obj.objects.push({
-                id: j*sz + i,
+            let id = j*sz + i
+            game.objects[id] = {
+                id,
                 bgColor: b ? lightUp : lightDown,
                 fgColor: b ? 'black' : 'white',
                 rect: { x: i, y: j, w: 1, h: 1 },
                 // text: b ? '⧳' : '⧲',
                 text: `${j*sz + i}`, // '¤',
-                events: [ 'click' ],
                 internalData: b
-            })
+            }
+            game.events[id] = [ 'click' ]
         }
     }
-    obj.info.progression = obj.objects.filter(o => !!o.internalData).length / obj.objects.length
-    return obj
+    game.playStatus.progression = Object.values(game.objects).filter(o => !!o.internalData).length / Object.values(game.objects).length
+    return game
 }
 
 
@@ -39,7 +41,7 @@ export const simulateServerForFlipGame = (objs, evtType, input) => {
     let obj = objs[0]
     let lightUp = 'hsl(0, 0%, 80%)'
     let lightDown = "hsl(0, 0%, 20%)"
-    output.objects.forEach(o => {
+    Object.values(output.objects).forEach(o => {
         let row = output.field.xsize
         let xdiff = (o.id % row) - (obj % row)
         let ydiff = Math.ceil((o.id + 1) / row) - Math.ceil((obj + 1) / row)
@@ -54,10 +56,10 @@ export const simulateServerForFlipGame = (objs, evtType, input) => {
             o.internalData = b
         }
     })
-    output.info.progression = output.objects.filter(o => !!o.internalData).length / output.objects.length
-    if (output.info.progression === 1) {
-        output.info.status = 'win'
-        output.objects.forEach(o => o.events = [])
+    output.playStatus.progression = Object.values(output.objects).filter(o => !!o.internalData).length / Object.values(output.objects).length
+    if (output.playStatus.progression === 1) {
+        output.playStatus.status = 'win'
+        Object.values(output.objects).forEach(o => o.events = [])
     }
     return output
 }

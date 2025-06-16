@@ -3,7 +3,7 @@
         xsize: 10,
         ysize: 10
     },
-    objects: [{
+    objects: [id:{
         id: 1,
         bgColor: "rgb(200 0 0)",
         fgColor: 'lime',
@@ -16,7 +16,10 @@
         rect: { x: 3, y: 4, w: 2, h: 3 },
         text: 'B',
         events: [ 'click' ]
-    }]
+    }],
+    events: {
+        'all' or object id: evt_types
+    }
 } */
 
 import { createDefinitionForFlipGame, simulateServerForFlipGame } from '/games/flip.js'
@@ -49,7 +52,7 @@ let draw = () => {
     xpx = rect.width / game.field.xsize
     ypx = rect.height / game.field.xsize
 
-    game.objects.forEach(obj => {
+    Object.values(game.objects).forEach(obj => {
         ctx.fillStyle = obj.bgColor;
         const fromx = xpx * obj.rect.x
         const sizex = xpx * obj.rect.w
@@ -71,7 +74,7 @@ let draw = () => {
         }
     })
 
-    document.querySelector('#game-status').innerHTML = `${game.info.status} (${Math.round(game.info.progression * 100)}%)`
+    document.querySelector('#game-status').innerHTML = `${game.playStatus.status} (${Math.round(game.playStatus.progression * 100)}%)`
     // ctx.fillStyle = "rgb(200 0 0)";
     // ctx.fillRect(10, 10, 50, 50);
 
@@ -88,8 +91,9 @@ const cellAt = (x, y) => {
 }
 
 const objectsAt = (x, y) => {
+    console.log('game.objects', game.objects)
     const cell = cellAt(x, y)
-    const collisions = game.objects.filter(obj =>
+    const collisions = Object.values(game.objects).filter(obj =>
         cell.x >= obj.rect.x &&
         cell.x < obj.rect.x + obj.rect.w &&
         cell.y >= obj.rect.y &&
@@ -114,7 +118,7 @@ let bindEvents = () => {
             console.log(x, y)
             // const coo = cellAt(x, y)
             const objs = objectsAt(x, y)
-            const withEvent = objs.filter(obj => (obj.events || []).includes(evtType))
+            const withEvent = objs.filter(obj => (game.events[obj.id] || []).includes(evtType))
             console.log(evtType, objs, withEvent)
             if (withEvent.length) {
                 game = g.simulateServer(withEvent.map(o => o.id), evtType, game)
