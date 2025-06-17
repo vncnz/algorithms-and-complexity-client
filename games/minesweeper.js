@@ -9,7 +9,7 @@ export const createDefinitionForMinesweeperGame = () => {
     let num_mines = 2
     let sec = sz * sz // security
     while (mines.length <= num_mines && --sec > 0) {
-        let rand = parseInt(Math.random() * sz * sz)
+        let rand = `id${parseInt(Math.random() * sz * sz)}`
         if (!mines.includes(rand)) mines.push(rand)
     }
     let game = {
@@ -28,7 +28,7 @@ export const createDefinitionForMinesweeperGame = () => {
 
     for(let i = 0; i < sz; i++) {
         for(let j = 0; j < sz; j++) {
-            let id = j*sz + i
+            let id = `id${j*sz + i}`
             // let b = game.playStatus.internalData.mines.includes(id)
             game.objects[id] = {
                 id,
@@ -46,10 +46,10 @@ export const createDefinitionForMinesweeperGame = () => {
     return game
 }
 
-export const simulateServerForMinesweeperGame = (objs, evtType, input) => {
-    console.warn('Simulating server input', objs, evtType, input)
+export const simulateServerForMinesweeperGame = (objid, evtType, input) => {
+    console.warn('Simulating server input', objid, evtType, input)
     let output = JSON.parse(JSON.stringify(input)) // simulo una comunicazione col server quindi non modifico l'oggetto corrente, ovviamente!
-    let objid = objs[0]
+    // let objid = objs[0]
     let obj = output.objects[objid]
 
     let isLeftClick = evtType === 'contextmenu'
@@ -65,7 +65,7 @@ export const simulateServerForMinesweeperGame = (objs, evtType, input) => {
         if (obj.internalData.mine) {
             output.playStatus.status = 'lose'
             // Object.values(output.objects).forEach(o => o.events = [])
-            output.events[id] = []
+            output.events[objid] = []
         }
     }
 
@@ -87,9 +87,9 @@ export const simulateServerForMinesweeperGame = (objs, evtType, input) => {
     return output
 }
 
-const getNeighbors = (id, row) => {
-    let r = Math.floor(id / row)
-    let c = id % row
+const getNeighbors = (r, c, row) => {
+    // let r = Math.floor(id / row)
+    // let c = id % row
 
     const directions = [
         [-1, -1], [-1, 0], [-1, 1],
@@ -110,8 +110,9 @@ const getNeighbors = (id, row) => {
         .filter(id => id !== null)
 }
 
-const countMines = (id, board) => {
-    let neigh = getNeighbors(id, board.field.xsize)
+const countMines = (x, y, board) => {
+    let neigh = getNeighbors(x, y, board.field.xsize).map(idx => `id${idx}`)
+    console.log('getNeighbors', x, y, board.field.xsize)
     return Object.values(board.objects).filter(o => {
         let isNeigh = neigh.includes(o.id)
         let isMine = board.playStatus.internalData.mines.includes(o.id)
@@ -131,7 +132,7 @@ const drawField = (output) => {
                     obj.text = 'X'
                     obj.bgColor = bgMine
                 } else {
-                    let c = countMines(obj.id, output)
+                    let c = countMines(obj.rect.x, obj.rect.y, output)
                     obj.text = `${c}`
                     obj.bgColor = bgGreen
                 }

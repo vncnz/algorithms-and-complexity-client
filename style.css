@@ -11,11 +11,15 @@ body {
     align-items: center;
 }
 
-canvas {
-    width: 700px;
-    aspect-ratio: 1;
+canvas, svg {
+    /* width: 500px; */
+    /* aspect-ratio: 1; */
     border: 1px solid black;
     box-shadow: 10px 10px 0 0 black;
+}
+svg {
+    width: 500px;
+    aspect-ratio: 1;
 }
 
 #game-status {

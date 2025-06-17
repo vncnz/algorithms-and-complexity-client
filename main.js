@@ -42,35 +42,57 @@ let game = g.createDefinition()
 let xpx = 0
 let ypx = 0
 
+let createSvgChild = (type, attrs, content) => {
+    let elm = document.createElementNS('http://www.w3.org/2000/svg', type)
+    elm.setAttribute("fill", "transparent")
+    elm.setAttribute("stroke", "gray")
+    for (const [key, value] of Object.entries(attrs)) {
+        elm.setAttribute(key, value)
+    }
+    if (content) elm.innerHTML = content
+    return elm
+}
 let draw = () => {
-    const canvas = document.querySelector('canvas')
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    ctx.font = "20px Arial";
+    const svg = document.querySelector('svg')
+    if (!svg) return
+    // ctx.font = "20px Arial";
+    svg.innerHTML = ""
 
-    const rect = canvas.getBoundingClientRect()
+    const rect = svg.getBoundingClientRect()
     xpx = rect.width / game.field.xsize
     ypx = rect.height / game.field.xsize
 
+    svg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`)
+
     Object.values(game.objects).forEach(obj => {
-        ctx.fillStyle = obj.bgColor;
+        // ctx.fillStyle = obj.bgColor;
         const fromx = xpx * obj.rect.x
         const sizex = xpx * obj.rect.w
         const fromy = ypx * obj.rect.y
         const sizey = ypx * obj.rect.h
+        console.log(fromx, fromy, sizex, sizey)
 
-        if (obj.bgColor) {
-            ctx.fillRect(fromx, fromy, sizex, sizey)
-            // console.log(`Drawing rect ${fromx}, ${fromy}, ${sizex}, ${sizey}`)
-        }
+        let rect = createSvgChild('rect', {
+            x: fromx,
+            y: fromy,
+            width: sizex,
+            height: sizey,
+            id: obj.id,
+            fill: obj.bgColor || "transparent"
+        })
+        svg.appendChild(rect)
 
         if (obj.text) {
-            ctx.fillStyle = obj.fgColor;
+            //ctx.fillStyle = obj.fgColor;
             const tx = fromx + sizex/2
             const ty = fromy + sizey/2
-            let w = ctx.measureText(obj.text).width
-            ctx.fillText(obj.text, tx - w/2, ty + w/2)
-            // console.log(`Writing text "${obj.text}" at ${tx}, ${ty}`)
+            let text = createSvgChild('text', {
+                x: tx,
+                y: ty
+            }, obj.text)
+            svg.appendChild(text)
+            // let w = ctx.measureText(obj.text).width
+            //ctx.fillText(obj.text, tx - w/2, ty + w/2)
         }
     })
 
@@ -83,50 +105,18 @@ let draw = () => {
 }
 draw()
 
-const cellAt = (x, y) => {
-    return {
-        x: Math.floor(x / xpx),
-        y: Math.floor(y / ypx)
-    }
-}
-
-const objectsAt = (x, y) => {
-    console.log('game.objects', game.objects)
-    const cell = cellAt(x, y)
-    const collisions = Object.values(game.objects).filter(obj =>
-        cell.x >= obj.rect.x &&
-        cell.x < obj.rect.x + obj.rect.w &&
-        cell.y >= obj.rect.y &&
-        cell.y < obj.rect.y + obj.rect.h
-    )
-    return collisions
-}
-
 let bindEvents = () => {
-    const canvas = document.querySelector('canvas')
-    if (!canvas) return
-
-    let canvasRect = canvas.getBoundingClientRect();
-
-    ['click', 'contextmenu'].forEach(evtType => {
-        canvas.addEventListener(evtType, evt => {
-            evt.preventDefault()
-            evt.stopImmediatePropagation()
-            console.log(evtType, evt)
-            const x = evt.pageX - canvasRect.left
-            const y = evt.pageY - canvasRect.top
-            console.log(x, y)
-            // const coo = cellAt(x, y)
-            const objs = objectsAt(x, y)
-            const withEvent = objs.filter(obj => (game.events[obj.id] || []).includes(evtType))
-            console.log(evtType, objs, withEvent)
-            if (withEvent.length) {
-                game = g.simulateServer(withEvent.map(o => o.id), evtType, game)
-                draw()
-            } else {
-                console.warn('No object with this event listener here!')
-            }
-        })
-    })
+    for (const [key, value] of Object.entries(game.events)) {
+        let elm = document.getElementById(key)
+        if (elm) {
+            value.forEach(evtType => {
+                elm.addEventListener(evtType, () => {
+                    game = g.simulateServer(key, evtType, game)
+                    draw()
+                    bindEvents()
+                })
+            })
+        }
+    }
 }
 bindEvents()
