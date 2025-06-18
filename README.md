@@ -72,6 +72,19 @@ Gli svantaggi sono i seguenti:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 ## Site where to see games
@@ -82,11 +95,9 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 - [x] IMPL: load and draw json data
 - [x] IMPL: method to get a clicked object
 - [x] IMPL: add local events to json
-- [x] GAME: Flip game
+- [/] GAME: Flip game
 - [x] GAME: Minesweeper game
-- [ ] Definire una doppia modalità griglia / disegno libero
-- [ ] GAME: Towers
-- [ ] GAME: Range
-- [ ] GAME: Same game
+- [ ] GAME: flood game
+- [ ] GAME: map game
 
 ```
