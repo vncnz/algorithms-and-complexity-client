@@ -26,3 +26,8 @@ svg {
     margin-top: 1rem;
     text-transform: capitalize;
 }
+
+text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+}

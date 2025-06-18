@@ -44,8 +44,6 @@ let ypx = 0
 
 let createSvgChild = (type, attrs, content) => {
     let elm = document.createElementNS('http://www.w3.org/2000/svg', type)
-    elm.setAttribute("fill", "transparent")
-    elm.setAttribute("stroke", "gray")
     for (const [key, value] of Object.entries(attrs)) {
         elm.setAttribute(key, value)
     }
@@ -78,7 +76,8 @@ let draw = () => {
             width: sizex,
             height: sizey,
             id: obj.id,
-            fill: obj.bgColor || "transparent"
+            fill: obj.bgColor || "transparent",
+            stroke: 'gray'
         })
         svg.appendChild(rect)
 
@@ -88,7 +87,8 @@ let draw = () => {
             const ty = fromy + sizey/2
             let text = createSvgChild('text', {
                 x: tx,
-                y: ty
+                y: ty,
+                style: 'pointer-events: none'
             }, obj.text)
             svg.appendChild(text)
             // let w = ctx.measureText(obj.text).width
@@ -110,7 +110,8 @@ let bindEvents = () => {
         let elm = document.getElementById(key)
         if (elm) {
             value.forEach(evtType => {
-                elm.addEventListener(evtType, () => {
+                elm.addEventListener(evtType, evt => {
+                    evt.preventDefault()
                     game = g.simulateServer(key, evtType, game)
                     draw()
                     bindEvents()

@@ -36,7 +36,7 @@ export const createDefinitionForMinesweeperGame = () => {
                 fgColor: 'black',
                 rect: { x: i, y: j, w: 1, h: 1 },
                 // text: b ? '⧳' : '⧲',
-                text: `O`,
+                text: ``,
                 internalData: { status: 'untouched', mine: mines.includes(id) }
             }
             game.events[id] = [ 'click', 'contextmenu' ]
@@ -87,7 +87,7 @@ export const simulateServerForMinesweeperGame = (objid, evtType, input) => {
     return output
 }
 
-const getNeighbors = (r, c, row) => {
+/* const getNeighbors = (r, c, rows, cols) => {
     // let r = Math.floor(id / row)
     // let c = id % row
 
@@ -103,20 +103,19 @@ const getNeighbors = (r, c, row) => {
             const newCol = c + dc;
 
             // Calcola il nuovo id
-            return newRow >= 0 && newRow < row && newCol >= 0 && newCol < row
-                ? newRow * row + newCol
+            return newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols
+                ? [newRow, newCol]
                 : null; // Fuori dai limiti
         })
         .filter(id => id !== null)
-}
+} */
 
 const countMines = (x, y, board) => {
-    let neigh = getNeighbors(x, y, board.field.xsize).map(idx => `id${idx}`)
+    // let neigh = getNeighbors(x, y, board.field.xsize).map(idx => `id${idx}`)
     console.log('getNeighbors', x, y, board.field.xsize)
-    return Object.values(board.objects).filter(o => {
-        let isNeigh = neigh.includes(o.id)
-        let isMine = board.playStatus.internalData.mines.includes(o.id)
-        return isMine && isNeigh
+
+    return Object.values(board.objects).filter(obj => {
+        return Math.abs(obj.rect.x - x) < 2 && Math.abs(obj.rect.y - y) < 2 && obj.internalData.mine
     }).length
 }
 
@@ -129,7 +128,7 @@ const drawField = (output) => {
                 break
             case 'seen':
                 if (obj.internalData.mine) {
-                    obj.text = 'X'
+                    obj.text = '💣'
                     obj.bgColor = bgMine
                 } else {
                     let c = countMines(obj.rect.x, obj.rect.y, output)
@@ -138,7 +137,7 @@ const drawField = (output) => {
                 }
                 break
             default:
-                obj.text = 'O'
+                obj.text = ''
                 obj.bgColor = bgGray
         }
     })
