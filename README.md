@@ -1,3 +1,6 @@
+[=== Something awesome's coming === working on this! ===]
+Please change branch - "Moving to SVG" is where things are done now!
+
 # algorithms-and-complexity-client
 The client of my project for algorithms and complexity exam
 
