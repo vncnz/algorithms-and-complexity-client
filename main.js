@@ -35,12 +35,16 @@ const gameManagement = {
         simulateServer: simulateServerForMinesweeperGame
     }
 }
-const g = gameManagement.minesweeper
+let gameServer = null
+let game = null
 
-let game = g.createDefinition()
-
-let xpx = 0
-let ypx = 0
+const chooseGame = choosen => {
+    console.log('chooseGame')
+    gameServer = choosen
+    game = gameServer.createDefinition()
+    draw()
+    bindEvents()
+}
 
 let createSvgChild = (type, attrs, content) => {
     let elm = document.createElementNS('http://www.w3.org/2000/svg', type)
@@ -57,8 +61,8 @@ let draw = () => {
     svg.innerHTML = ""
 
     const rect = svg.getBoundingClientRect()
-    xpx = rect.width / game.field.xsize
-    ypx = rect.height / game.field.xsize
+    const xpx = rect.width / game.field.xsize
+    const ypx = rect.height / game.field.xsize
 
     svg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`)
 
@@ -68,7 +72,7 @@ let draw = () => {
         const sizex = xpx * obj.rect.w
         const fromy = ypx * obj.rect.y
         const sizey = ypx * obj.rect.h
-        console.log(fromx, fromy, sizex, sizey)
+        // console.log(fromx, fromy, sizex, sizey)
 
         let rect = createSvgChild('rect', {
             x: fromx,
@@ -103,7 +107,6 @@ let draw = () => {
     // ctx.fillStyle = "rgb(0 0 200 / 50%)";
     // ctx.fillRect(30, 30, 50, 50);
 }
-draw()
 
 let bindEvents = () => {
     for (const [key, value] of Object.entries(game.events)) {
@@ -112,7 +115,7 @@ let bindEvents = () => {
             value.forEach(evtType => {
                 elm.addEventListener(evtType, evt => {
                     evt.preventDefault()
-                    game = g.simulateServer(key, evtType, game)
+                    game = gameServer.simulateServer(key, evtType, game)
                     draw()
                     bindEvents()
                 })
@@ -120,4 +123,14 @@ let bindEvents = () => {
         }
     }
 }
-bindEvents()
+
+chooseGame(gameManagement.minesweeper)
+new Array(...document.querySelectorAll('.game-chooser button')).forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (gameManagement[btn.getAttribute('game')]) {
+            chooseGame(gameManagement[btn.getAttribute('game')])
+        } else {
+            console.warn("Unknown game")
+        }
+    })
+})
