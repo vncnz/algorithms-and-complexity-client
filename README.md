@@ -1,3 +1,5 @@
+[=== Something awesome's coming === working on this! ===]
+
 # algorithms-and-complexity-client
 The client of my project for algorithms and complexity exam
 
