@@ -4,11 +4,11 @@ let bgGray = "hsl(0, 0%, 80%)"
 let bgGreen = "hsl(100, 80%, 80%)"
 
 export const createDefinitionForMinesweeperGame = () => {
-    let sz = 4
+    let sz = 8
     let mines = []
-    let num_mines = 2
+    let num_mines = Math.ceil(sz * sz / 6)
     let sec = sz * sz // security
-    while (mines.length <= num_mines && --sec > 0) {
+    while (mines.length < num_mines && --sec > 0) {
         let rand = `id${parseInt(Math.random() * sz * sz)}`
         if (!mines.includes(rand)) mines.push(rand)
     }
@@ -80,40 +80,13 @@ export const simulateServerForMinesweeperGame = (objid, evtType, input) => {
     output.playStatus.progression = (Object.values(output.objects).filter(o => o.internalData.status !== 'untouched').length / (Object.values(output.objects).length))
     if (output.playStatus.status != 'lose' && output.playStatus.progression === 1) {
         output.playStatus.status = 'win'
-        // Object.values(output.objects).forEach(o => o.events = [])
         output.events = []
     }
     console.warn('Simulating server output', output)
     return output
 }
 
-/* const getNeighbors = (r, c, rows, cols) => {
-    // let r = Math.floor(id / row)
-    // let c = id % row
-
-    const directions = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [ 0, -1],          [ 0, 1],
-        [ 1, -1], [ 1, 0], [ 1, 1]
-    ]
-
-    return directions
-        .map(([dr, dc]) => {
-            const newRow = r + dr;
-            const newCol = c + dc;
-
-            // Calcola il nuovo id
-            return newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols
-                ? [newRow, newCol]
-                : null; // Fuori dai limiti
-        })
-        .filter(id => id !== null)
-} */
-
 const countMines = (x, y, board) => {
-    // let neigh = getNeighbors(x, y, board.field.xsize).map(idx => `id${idx}`)
-    console.log('getNeighbors', x, y, board.field.xsize)
-
     return Object.values(board.objects).filter(obj => {
         return Math.abs(obj.rect.x - x) < 2 && Math.abs(obj.rect.y - y) < 2 && obj.internalData.mine
     }).length
