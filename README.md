@@ -1,6 +1,77 @@
 # algorithms-and-complexity-client
 The client of my project for algorithms and complexity exam
 
+## Obiettivo
+L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro [TODO finire]
+
+## Idea di base
+L'idea di base per l'implementazione è di gestire il rendering lato client principalmente tramite un elemento che consenta di visualizzare tutti gli oggetti legati al gioco ed i relativi eventi, inizialmente di tipo canvas ma poi sostituito con uno di tipo svg (vedi paragrafo dedicato).
+
+## Canvas vs SVG
+
+Nell progetto è stata inizialmente implementata una gestione che verteva su un elemento `<canvas>` ma è stato convertito per l'utilizzo di un elemento `<svg>`. La valutazione che ha portato a questa scelta si basa sulle caratteristiche dei giochi da implementare. Il canvas è una sorta di lavagna su cui disegnare liberamente: questo è comodo per i giochi che richiedono un framerate elevato e per effetti grafici e scene molto dinamiche. L'svg, invece, permette di avere un DOM strutturato in cui le entità grafiche sono degli oggetti del DOM, di cui è possibile manipolare le caratteristiche come posizione e dimensioni e su cui è possibile catturare gli eventi senza alcuna necessità di effettuare calcoli per comprendere se un click all'interno dell'area di disegno ricade o meno, da un punto di vista logico, all'interno di un certo oggetto. Questo calcolo, inoltre, è semplice da implementare per oggetti quadrati o circolari ma può diventare molto complesso per oggetti dalla forma irregolare. L'utilizzo di un svg permette di preservare l'oggetto grafico come entità, con i vantaggi che ne derivano, mentre il canvas è una superficie piatta su cui tutti gli oggetti grafici diventano un tutt'uno.
+
+Ricapitolando, questi sono vantaggi e svantaggi delle due soluzioni:
+
+Canvas (la prima soluzione implementata):\
+✅ Alto framerate \
+✅ Possibilità di implementare effetti grafici\
+❌ Appiattimento degli oggetti durante il rendering\
+❌ Individuazione manuale degli oggetti che ricevono un evento di click\
+❌ Gestione complessa di un eventuale aggiornamento parziale della schermata di gioco
+
+SVG (l'attuale soluzione implementata):\
+✅ Mantenimento degli oggetti di gioco come entità\
+✅ Facilità di agganciamento dei listener sui singoli elementi di gioco\
+✅ Facilità di mantenimento degli oggetti che non mutano durante un aggiornamento\
+❌ Minori prestazioni durante un aggiornamento dell'intero campo di gioco\
+❌ Difficoltà di implementazione di effetti grafici, in particolare particellari o legati ai colori
+
+
+## Stateful vs stateless
+
+Nell'implementazione della comunicazione tra server e client si è dovuto scegliere tra due filosofie differenti, che possiamo indicare, dal punto di vista del server, con i seguenti nomi:
+- Stateful
+- Stateless
+
+### Stateful
+
+Seguendo questa filosofia, il server può tenere traccia dello stato del gioco per ogni giocatore attualmente attivo. I vantaggi di questa strategia sono principalmente due:
+- Le comunicazioni tra client e server riguardano i soli cambiamenti da applicare al gioco in quando lo stato del gioco è conosciuto da entrambi in ogni momento
+- I giochi possono essere multigiocatore, in quanto il server fa da coordinatore, raccoglie ed applica gli input degli utenti ad un unico stato di gioco che distribuisce a tutti i client coinvolti in una partita
+
+Di contro, con questa filosofia si hanno i seguenti svantaggi:
+- Il server deve mantenere in memoria dei dati per ciascun giocatore connesso, con conseguente occupazione di memoria
+- Il server deve capire quando un giocatore interrompe la partita chiudendo il proprio browser ed implementare dei meccanismi per la liberazione della memoria da partite rimaste in sospeso
+- Minore resistenza a bug di comunicazione o implementazione: client e server potrebbero divergere nell'applicazione dei cambiamenti di stato alla partita a causa di bug
+
+### Stateless
+
+Seguendo questa filosofia, il server non tiene traccia in alcun modo dello stato della partita. Al momento della creazione di una nuova partita esso invia al client un oggetto contenente sia gli oggetti grafici per il gioco sia eventuali informazioni legate allo stato della partita stessa. Ad ogni mossa del giocatore, il client reinvia al server lo stato completo e quest'ultimo, dopo aver applicato sullo stato appena ricevuto le logiche di gioco, reinvia al client uno stato di gioco aggiornato.
+
+I vantaggi di questa filosofia sono i seguenti:
+- Il server non ha alcuna occupazione di memoria al di fuori del momento in cui sta elaborando una risposta per un client. Non servono logiche di pulizia per eventuali partite sospese, non è necessario limitare il numero di partite contemporanee
+- Server e client sono sempre ben allineati sullo stato del gioco in quanto esso viaggia avanti ed indietro in maniera completa ad ogni passaggio
+
+Gli svantaggi sono i seguenti:
+- Il client riceve uno stato di gioco che contiene anche informazioni nascoste al giocatore, giocatore che potrebbe analizzare le comunicazioni ed accedere a tali informazioni
+- Maggiore payload nelle comunicazioni, in quanto non viaggiano solo gli aggiornamenti ma ogni informazione legata al gioco ed alla sua UI
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
 ## Site where to see games
 https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 
@@ -16,5 +87,4 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 - [ ] GAME: Range
 - [ ] GAME: Same game
 
-
-## Canvas vs SVG
+```
