@@ -15,3 +15,6 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 - [ ] GAME: Towers
 - [ ] GAME: Range
 - [ ] GAME: Same game
+
+
+## Canvas vs SVG
