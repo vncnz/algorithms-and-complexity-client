@@ -60,7 +60,11 @@ Gli svantaggi sono i seguenti:
 - Maggiore payload nelle comunicazioni, in quanto non viaggiano solo gli aggiornamenti ma ogni informazione legata al gioco ed alla sua UI
 
 
+## Oggetti grafici del gioco
 
+Per quanto riguarda la rappresentazione degli oggetti del gioco, come per la scelta tra canvas e svg, il progetto è stato inizialmente implementato in un modo ma col procedere degli sviluppi si è proceduto ad un refactoring per aumentare l'elasticità della soluzione.
+
+L'implementazione iniziale vedeva gli oggetti rappresentati tramite delle coordinate all'interno di un tavolo considerato a scacchiera: il server inviava quindi la definizione del tavolo di gioco come una coppia di valori pari al numero di righe ed al numero di colonne in cui dividere il tavolo ed ogni oggetto aveva, tra le proprie caratteristiche, una posizione definita come coppia di coordinate che rappresentassero la cella di destinazione.
 
 
 
