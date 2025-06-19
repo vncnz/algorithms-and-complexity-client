@@ -103,7 +103,7 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 - [x] IMPL: add local events to json
 - [/] GAME: Flip game
 - [x] GAME: Minesweeper game
-- [ ] GAME: flood game
 - [ ] GAME: map game
+- [ ] GAME: flood game
 
 ```

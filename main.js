@@ -24,6 +24,7 @@
 
 import { createDefinitionForFlipGame, simulateServerForFlipGame } from '/games/flip.js'
 import { createDefinitionForMinesweeperGame, simulateServerForMinesweeperGame } from '/games/minesweeper.js'
+import { createDefinitionForMapGame, simulateServerForMapGame } from '/games/map.js'
 
 const gameManagement = {
     flip: {
@@ -33,6 +34,10 @@ const gameManagement = {
     minesweeper: {
         createDefinition: createDefinitionForMinesweeperGame,
         simulateServer: simulateServerForMinesweeperGame
+    },
+    map: {
+        createDefinition: createDefinitionForMapGame,
+        simulateServer: simulateServerForMapGame
     }
 }
 let gameServer = null
