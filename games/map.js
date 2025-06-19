@@ -1,121 +1,123 @@
-let color1 = 'hsl(0, 80%, 50%)'
-let color2 = 'hsl(60, 60%, 50%)'
+let color1 = 'hsl(0, 70%, 60%)'
+let color2 = 'hsl(60, 70%, 50%)'
 let color3 = "hsl(20, 40%, 50%)"
-let color4 = "hsl(100, 80%, 80%)"
+let color4 = "hsl(100, 40%, 50%)"
+let colors = [color1, color2, color3, color4]
+
+let p1 = [0,730]
+let p2 = [384,730]
+let p3 = [530,862]
+let p4 = [0,50]
+let p5 = [432,480]
+let p6 = [240,670]
+let p7 = [240,730]
+let p8 = [534,382]
+let p9 = [816,666]
+let p10 = [624,862]
+let p11 = [826,380]
+let p12 = [1000,190]
+let p13 = [1000,480]
+let p14 = [430,0]
+let p15 = [634,380]
+let p16 = [720,290]
+
+let polygons = [
+    [p1, p2, p3, [0,862]],
+    [p4, p5, p6, p7, p1],
+    [p8, p9, p10, p3, p2, p7, p6],
+    [p8, p11, p12, p13, p9],
+    [p14, [1000,0], p12, p11, p15, p16],
+    [p4, [0,0], p14, p16, p15, p8, p5],
+    [p13, [1000,862], p10]
+]
+
+let near = [
+    [0, 1],
+    [0, 2],
+    [1, 2],
+    [1, 5],
+    [2, 3],
+    [2, 5],
+    [2, 6],
+    [3, 4],
+    [3, 5],
+    [3, 6],
+    [4, 5]
+]
 
 export const createDefinitionForMapGame = (preferredSize) => {
-    /* const sz = 8
-    const unit = preferredSize / sz
 
-    let mines = []
-    let num_mines = Math.ceil(sz * sz / 6)
-    let sec = sz * sz // security
-    while (mines.length < num_mines && --sec > 0) {
-        let rand = `id${parseInt(Math.random() * sz * sz)}`
-        if (!mines.includes(rand)) mines.push(rand)
-    }
     let game = {
         field: {
-            // xsize: sz,
-            // ysize: sz,
             width: preferredSize,
             height: preferredSize
         },
         playStatus: {
             status: 'running',
             progression: 0,
-            internalData: { mines }
+            internalData: {}
         },
         objects: {},
         events: {}
     }
 
-    for(let i = 0; i < sz; i++) {
-        for(let j = 0; j < sz; j++) {
-            let id = `id${j*sz + i}`
-            // let b = game.playStatus.internalData.mines.includes(id)
-            game.objects[id] = {
-                id,
-                rect: { x: i, y: j, w: 1, h: 1 },
-                internalData: { status: 'untouched', mine: mines.includes(id) },
-                points: [[i*unit, j*unit], [i*unit + unit, j*unit], [i*unit + unit, j*unit + unit], [i*unit, j*unit + unit]]
-            }
-            game.events[id] = [ 'click', 'contextmenu' ]
+    polygons.forEach((poly, idx) => {
+        let id = `id${idx}`
+        let locked = false
+        game.objects[id] = {
+            id,
+            internalData: { locked, color: idx % colors.length },
+            points: poly.map(point => [point[0]/1000 * preferredSize, point[1]/862 * preferredSize])
         }
-    }
+        game.events[id] = locked ? [] : [ 'click', 'contextmenu' ]
+    })
     drawField(game)
-    game.playStatus.progression = 1 - (Object.values(game.objects).filter(o => !!o.internalData).length / Object.values(game.objects).length)
-    return game */
+    game.playStatus.progression = 0
+    return game
 }
 
 export const simulateServerForMapGame = (objid, evtType, input) => {
-    /* console.warn('Simulating server input', objid, evtType, input)
+    console.warn('Simulating server input', objid, evtType, input)
     let output = JSON.parse(JSON.stringify(input)) // simulo una comunicazione col server quindi non modifico l'oggetto corrente, ovviamente!
     // let objid = objs[0]
     let obj = output.objects[objid]
 
+    let isRightClick = evtType === 'click'
     let isLeftClick = evtType === 'contextmenu'
-    if (isLeftClick) {
-        console.log('isLeftClick', isLeftClick)
-        if (obj.internalData.status == 'flag') obj.internalData.status = 'untouched'
-        else obj.internalData.status = 'flag'
-    } else {
-        obj.internalData.status = 'seen'
-    }
-
-    if (obj.internalData.status == 'seen') {
-        if (obj.internalData.mine) {
-            output.playStatus.status = 'lose'
-            // Object.values(output.objects).forEach(o => o.events = [])
-            output.events[objid] = []
-        }
-    }
-
-    if (output.playStatus.status == 'lose') {
-        Object.values(output.objects).forEach(obj => {
-            obj.internalData.status = 'seen'
-        })
+    if ((isRightClick || isLeftClick) && !obj.internalData.locked) {
+        obj.internalData.color = (obj.internalData.color + 1) % colors.length
     }
 
     drawField(output)
+    let win = checkWin(output)
 
-    output.playStatus.progression = (Object.values(output.objects).filter(o => o.internalData.status !== 'untouched').length / (Object.values(output.objects).length))
-    if (output.playStatus.status != 'lose' && output.playStatus.progression === 1) {
-        output.playStatus.status = 'win'
-        output.events = []
+    if (win) {
+        output.playStatus.status = 'Win'
+        output.events = {}
     }
+
     console.warn('Simulating server output', output)
-    return output */
+    return output
 }
-/*
-const countMines = (x, y, board) => {
-    return Object.values(board.objects).filter(obj => {
-        return Math.abs(obj.rect.x - x) < 2 && Math.abs(obj.rect.y - y) < 2 && obj.internalData.mine
-    }).length
-}
-*/
-/*
+
 const drawField = (output) => {
-    Object.values(output.objects).forEach(obj => {
-        switch (obj.internalData.status) {
-            case 'flag':
-                obj.text = '🏴'
-                obj.bgColor = bgFlag
-                break
-            case 'seen':
-                if (obj.internalData.mine) {
-                    obj.text = '💣'
-                    obj.bgColor = bgMine
-                } else {
-                    let c = countMines(obj.rect.x, obj.rect.y, output)
-                    obj.text = `${c}`
-                    obj.bgColor = bgGreen
-                }
-                break
-            default:
-                obj.text = ''
-                obj.bgColor = bgGray
-        }
+    Object.values(output.objects).forEach((obj, idx) => {
+        obj.bgColor = colors[obj.internalData.color]
+        obj.text = idx.toString()
     })
 }
-*/
+
+const checkWin = (output) => {
+    let ok = true
+    near.forEach(couple => {
+        let c1 = Object.values(output.objects)[couple[0]].internalData.color
+        let c2 = Object.values(output.objects)[couple[1]].internalData.color
+        if (c1 == c2) {
+            ok = false
+            console.log('eq', couple, c1, c2)
+        } else {
+            console.log('diff', couple, c1, c2)
+        }
+    })
+    return ok
+}
