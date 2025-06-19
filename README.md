@@ -66,7 +66,8 @@ Per quanto riguarda la rappresentazione degli oggetti del gioco, come per la sce
 
 L'implementazione iniziale vedeva gli oggetti rappresentati tramite delle coordinate all'interno di un tavolo considerato a scacchiera: il server inviava quindi la definizione del tavolo di gioco come una coppia di valori pari al numero di righe ed al numero di colonne in cui dividere il tavolo ed ogni oggetto aveva, tra le proprie caratteristiche, una posizione definita come coppia di coordinate che rappresentassero la cella di destinazione.
 
-
+Nell'implementazione corrente gli oggetti vengono descritti tramite liste di coordinate dei vertici, questo consente di avere forme irregolari se necessario.
+L'eventuale testo dell'oggetto viene visualizzato al centro del rettangolo che si ottiene con la funzione ```HTMLelement.getBBox()```, che restituisce un rettangolo che circoscrive l'intero poligono. Questa logica funziona bene per poligoni regolari, come quadrati o rettangoli, ma anche per poligoni irregolari che mantengono una forma convessa e con vertici che hanno distanze dal baricentro non troppo differenti. È possibile, come evolutiva, implementare un algoritmo più complesso e costruire una funzione di calcolo del baricentro della figura.
 
 
 
