@@ -66,7 +66,7 @@ export const createDefinitionForMapGame = (preferredSize) => {
         let locked = false
         game.objects[id] = {
             id,
-            internalData: { locked, color: idx % colors.length },
+            internalData: { locked, color: Math.floor(Math.random() * colors.length) },
             points: poly.map(point => [point[0]/1000 * preferredSize, point[1]/862 * preferredSize])
         }
         game.events[id] = locked ? [] : [ 'click', 'contextmenu' ]
@@ -114,9 +114,6 @@ const checkWin = (output) => {
         let c2 = Object.values(output.objects)[couple[1]].internalData.color
         if (c1 == c2) {
             ok = false
-            console.log('eq', couple, c1, c2)
-        } else {
-            console.log('diff', couple, c1, c2)
         }
     })
     return ok
