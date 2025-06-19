@@ -98,11 +98,16 @@ let draw = () => {
         svg.appendChild(rect)
 
         if (obj.text) {
-
             // For simple polygons bbox center will be ok
-            let bbox = rect.getBBox()
-            const tx = bbox.x + bbox.width/2
-            const ty = bbox.y + bbox.height/2
+            // let bbox = rect.getBBox()
+            // const tx = bbox.x + bbox.width/2
+            // const ty = bbox.y + bbox.height/2
+
+            // For complex polygons (coo avg)
+            const tx = obj.points.map(p => p[0]).reduce((sum, el) => sum + el) / obj.points.length
+            const ty = obj.points.map(p => p[1]).reduce((sum, el) => sum + el) / obj.points.length
+
+
             let text = createSvgChild('text', {
                 x: tx,
                 y: ty,
@@ -114,7 +119,11 @@ let draw = () => {
         }
     })
 
-    document.querySelector('#game-status').innerHTML = `${game.playStatus.status} (${Math.round(game.playStatus.progression * 100)}%)`
+    if (game.playStatus.progression) {
+        document.querySelector('#game-status').innerHTML = `${game.playStatus.status} (${Math.round(game.playStatus.progression * 100)}%)`
+    } else {
+        document.querySelector('#game-status').innerHTML = `${game.playStatus.status}`
+    }
     // ctx.fillStyle = "rgb(200 0 0)";
     // ctx.fillRect(10, 10, 50, 50);
 
@@ -138,7 +147,7 @@ let bindEvents = () => {
     }
 }
 
-chooseGame(gameManagement.minesweeper)
+chooseGame(gameManagement.map)
 new Array(...document.querySelectorAll('.game-chooser button')).forEach(btn => {
     btn.addEventListener('click', () => {
         if (gameManagement[btn.getAttribute('game')]) {
