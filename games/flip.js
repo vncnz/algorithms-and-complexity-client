@@ -1,5 +1,6 @@
-export const createDefinitionForFlipGame = () => {
+export const createDefinitionForFlipGame = (preferredSize) => {
     let sz = 4
+    const unit = preferredSize / sz
     let game = {
         field: {
             xsize: sz,
@@ -18,8 +19,9 @@ export const createDefinitionForFlipGame = () => {
             let id = j*sz + i
             game.objects[id] = {
                 id,
-                rect: { x: i, y: j, w: 1, h: 1 },
-                internalData: { on: b }
+                rect: { x: i, y: j },
+                internalData: { on: b },
+                points: [[i*unit, j*unit], [i*unit + unit, j*unit], [i*unit + unit, j*unit + unit], [i*unit, j*unit + unit]]
             }
             game.events[id] = [ 'click' ]
         }

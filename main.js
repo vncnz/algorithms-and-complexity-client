@@ -37,11 +37,12 @@ const gameManagement = {
 }
 let gameServer = null
 let game = null
+let size = 500
 
 const chooseGame = choosen => {
     console.log('chooseGame')
     gameServer = choosen
-    game = gameServer.createDefinition()
+    game = gameServer.createDefinition(size)
     draw()
     bindEvents()
 }
@@ -60,21 +61,20 @@ let draw = () => {
     // ctx.font = "20px Arial";
     svg.innerHTML = ""
 
-    const rect = svg.getBoundingClientRect()
-    const xpx = rect.width / game.field.xsize
-    const ypx = rect.height / game.field.xsize
+    // const rect = svg.getBoundingClientRect()
+    // const xpx = rect.width / game.field.xsize
+    // const ypx = rect.height / game.field.xsize
 
-    svg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`)
+    svg.setAttribute("viewBox", `0 0 ${game.field.width} ${game.field.height}`)
 
     Object.values(game.objects).forEach(obj => {
-        // ctx.fillStyle = obj.bgColor;
-        const fromx = xpx * obj.rect.x
-        const sizex = xpx * obj.rect.w
-        const fromy = ypx * obj.rect.y
-        const sizey = ypx * obj.rect.h
+        // const fromx = xpx * obj.rect.x
+        // const sizex = xpx * obj.rect.w
+        // const fromy = ypx * obj.rect.y
+        // const sizey = ypx * obj.rect.h
         // console.log(fromx, fromy, sizex, sizey)
 
-        let rect = createSvgChild('rect', {
+        /* let rect = createSvgChild('rect', {
             x: fromx,
             y: fromy,
             width: sizex,
@@ -83,12 +83,21 @@ let draw = () => {
             fill: obj.bgColor || "transparent",
             stroke: 'gray'
         })
+        svg.appendChild(rect) */
+        let rect = createSvgChild('polygon', {
+            points: obj.points.map(p => `${p[0]},${p[1]}`).join(' '),
+            id: obj.id,
+            fill: obj.bgColor || "transparent",
+            stroke: 'gray'
+        })
         svg.appendChild(rect)
 
         if (obj.text) {
-            //ctx.fillStyle = obj.fgColor;
-            const tx = fromx + sizex/2
-            const ty = fromy + sizey/2
+
+            // For simple polygons bbox center will be ok
+            let bbox = rect.getBBox()
+            const tx = bbox.x + bbox.width/2
+            const ty = bbox.y + bbox.height/2
             let text = createSvgChild('text', {
                 x: tx,
                 y: ty,

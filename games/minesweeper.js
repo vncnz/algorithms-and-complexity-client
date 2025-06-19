@@ -3,8 +3,10 @@ let bgFlag = 'hsl(0, 80%, 80%)'
 let bgGray = "hsl(0, 0%, 80%)"
 let bgGreen = "hsl(100, 80%, 80%)"
 
-export const createDefinitionForMinesweeperGame = () => {
-    let sz = 8
+export const createDefinitionForMinesweeperGame = (preferredSize) => {
+    const sz = 8
+    const unit = preferredSize / sz
+
     let mines = []
     let num_mines = Math.ceil(sz * sz / 6)
     let sec = sz * sz // security
@@ -14,8 +16,10 @@ export const createDefinitionForMinesweeperGame = () => {
     }
     let game = {
         field: {
-            xsize: sz,
-            ysize: sz
+            // xsize: sz,
+            // ysize: sz,
+            width: preferredSize,
+            height: preferredSize
         },
         playStatus: {
             status: 'running',
@@ -32,16 +36,14 @@ export const createDefinitionForMinesweeperGame = () => {
             // let b = game.playStatus.internalData.mines.includes(id)
             game.objects[id] = {
                 id,
-                bgColor: bgGray,
-                fgColor: 'black',
                 rect: { x: i, y: j, w: 1, h: 1 },
-                // text: b ? '⧳' : '⧲',
-                text: ``,
-                internalData: { status: 'untouched', mine: mines.includes(id) }
+                internalData: { status: 'untouched', mine: mines.includes(id) },
+                points: [[i*unit, j*unit], [i*unit + unit, j*unit], [i*unit + unit, j*unit + unit], [i*unit, j*unit + unit]]
             }
             game.events[id] = [ 'click', 'contextmenu' ]
         }
     }
+    drawField(game)
     game.playStatus.progression = 1 - (Object.values(game.objects).filter(o => !!o.internalData).length / Object.values(game.objects).length)
     return game
 }
