@@ -42,7 +42,7 @@ const gameManagement = {
 }
 let gameServer = null
 let game = null
-let size = 500
+let size = 800
 
 const chooseGame = choosen => {
     console.log('chooseGame')
@@ -65,6 +65,8 @@ let draw = () => {
     if (!svg) return
     // ctx.font = "20px Arial";
     svg.innerHTML = ""
+    svg.setAttribute("width", size)
+    svg.setAttribute("height", size)
 
     // const rect = svg.getBoundingClientRect()
     // const xpx = rect.width / game.field.xsize
@@ -119,11 +121,10 @@ let draw = () => {
         }
     })
 
-    if (game.playStatus.progression) {
-        document.querySelector('#game-status').innerHTML = `${game.playStatus.status} (${Math.round(game.playStatus.progression * 100)}%)`
-    } else {
-        document.querySelector('#game-status').innerHTML = `${game.playStatus.status}`
-    }
+    let to_output = [game.playStatus.status]
+    if (game.playStatus.progressionText) { to_output.push(`(${game.playStatus.progressionText})`) }
+    if (game.playStatus.progression) { to_output.push(`(${Math.round(game.playStatus.progression * 100)}%)`) }
+    document.querySelector('#game-status').innerHTML = to_output.join(' ')
     // ctx.fillStyle = "rgb(200 0 0)";
     // ctx.fillRect(10, 10, 50, 50);
 
@@ -147,7 +148,7 @@ let bindEvents = () => {
     }
 }
 
-chooseGame(gameManagement.map)
+chooseGame(gameManagement.minesweeper)
 new Array(...document.querySelectorAll('.game-chooser button')).forEach(btn => {
     btn.addEventListener('click', () => {
         if (gameManagement[btn.getAttribute('game')]) {
