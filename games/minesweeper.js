@@ -44,7 +44,7 @@ export const createDefinitionForMinesweeperGame = (preferredSize) => {
         }
     }
     drawField(game)
-    game.playStatus.progression = 1 - (num_mines / Object.values(game.objects).length)
+    game.playStatus.progression = 0
     game.playStatus.progressionText = `${num_mines} left`
     return game
 }

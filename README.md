@@ -71,6 +71,9 @@ L'eventuale testo dell'oggetto viene visualizzato al centro del rettangolo che s
 Si è comunque mantenuta la presenza delle coordinate `x` ed `y` per gli oggetti in quei giochi che hanno un tavolo di gioco a scacchiera, non ai fini del rendering ma come supporto per i calcoli di vicinanza tra le celle. Queste coordinate non sono quindi più coordinate grafiche, legate alla dimensione del tavolo di gioco in pixel, ma indici di riga e colonna.
 
 
+## Posizionamento delle eventuali scritte all'interno dei poligoni
+
+Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima versione utilizzava il centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non funziona bene per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro. L'evoluzione è stato quindi ...........................
 
 
 

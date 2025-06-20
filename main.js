@@ -42,7 +42,7 @@ const gameManagement = {
 }
 let gameServer = null
 let game = null
-let size = 800
+let size = 500
 
 const chooseGame = choosen => {
     console.log('chooseGame')
@@ -148,7 +148,7 @@ let bindEvents = () => {
     }
 }
 
-chooseGame(gameManagement.minesweeper)
+chooseGame(gameManagement.map)
 new Array(...document.querySelectorAll('.game-chooser button')).forEach(btn => {
     btn.addEventListener('click', () => {
         if (gameManagement[btn.getAttribute('game')]) {
