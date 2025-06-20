@@ -288,7 +288,7 @@ export class Point {
 	}
 }
 
-class Edge {
+export class Edge {
 	constructor(p1, p2, startx) {
 		this.m = -(p1.x - p2.x) / (p1.y - p2.y);
 		this.q =

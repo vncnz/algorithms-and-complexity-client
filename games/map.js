@@ -1,15 +1,23 @@
-import { VoronoiDiagram, Point } from './voronoi.js'
+import { VoronoiDiagram, Point , Edge } from './voronoi.js'
 
 let computeVoronoi = (size) => {
+    console.log('computeVoronoi', size)
     let points = [
-        
+        new Point(size * 0.3, 0),
+        new Point(size * 0.7, 0),
+        // new Point(size + 10, size * 0.5),
+        // new Point(size * 0.5, size + 10),
+        // new Point(-10, size * 0.5),
+
         new Point(140,180),
         new Point(230,200),
         new Point(210,60),
         new Point(200,160),
-        new Point(240,250),
+        new Point(250,250)
         // new Point(size, size)
     ];
+
+    console.log('points', points)
 
     let height = size;
     let width = size;
@@ -28,12 +36,13 @@ let computeVoronoi = (size) => {
     return { edges, vertices, vor }
 }
 
-let extractPolygonsAndAdjacency = (edges) => {
+let extractPolygonsAndAdjacency = (edges, size) => {
     const idMap = new Map();  // Point → id univoco
     let nextId = 0;
 
     const polygons = new Map();     // id → lista di punti (vertici)
     const adjacency = new Set();    // string "i-j"
+    const borderCells = new Set();
 
     for (const { start, end, arc: { left, right } } of edges) {
         // assegna id a left/right se ancora non mappati
@@ -48,11 +57,15 @@ let extractPolygonsAndAdjacency = (edges) => {
             polygons.set(lid,
                 (polygons.get(lid) || []).concat([start, end])
             );
+        } else {
+            borderCells.add(rid);
         }
         if (rid != null) {
             polygons.set(rid,
                 (polygons.get(rid) || []).concat([end, start])
             );
+        } else {
+            borderCells.add(lid);
         }
 
         if (lid != null && rid != null) {
@@ -60,11 +73,12 @@ let extractPolygonsAndAdjacency = (edges) => {
             adjacency.add(key);
         }
     }
+    console.log('borders', borderCells)
 
     const finalPolygons = Array.from(polygons.entries()).map(
         ([id, pts]) => {
         const seen = new Set();
-        const unique = pts.filter(p => {
+        let unique = pts.filter(p => {
             const k = `${p.x},${p.y}`;
             if (seen.has(k)) return false;
             seen.add(k);
@@ -79,6 +93,9 @@ let extractPolygonsAndAdjacency = (edges) => {
         unique.sort((a,b) =>
             Math.atan2(a.y - site.y, a.x - site.x) - Math.atan2(b.y - site.y, b.x - site.x)
         );
+
+        unique = completePoly(unique, size)
+
         return { id, points: unique };
         }
     );
@@ -90,10 +107,71 @@ let extractPolygonsAndAdjacency = (edges) => {
     return { polygons: finalPolygons, adjacency: adjacencyPairs };
 }
 
+let completePoly = (poly, size) => {
+    // TODO: valutare se questa è la scelta migliore e nel caso gestire il salto eventuale di un intero lato
+    // * L'alternativa è che si mettano dei punti sentinella nei posti giusti
+    // ! Attenzione anche al fatto che funziona solo se ci sono poligoni incompleti con almeno due edges e bisogna capire perché
+    console.log('ppoly', poly)
+    for (let i=0; i<poly.length; i++) {
+        let p1 = poly[i]
+        let p2 = poly[(i+1) % poly.length]
+        console.log(p1, p2)
+        if (p1.x === size && p2.y === size) {
+            console.log('inserting bottom right')
+            poly.splice(i+1, 0, new Point(size, size))
+            i += 1
+        } else if (p1.y === size && p2.x === 0) {
+            console.log('inserting bottom left')
+            poly.splice(i+1, 0, new Point(0, size))
+            i += 1
+        } else if (p1.x === 0 && p2.y === 0) {
+            console.log('inserting top left')
+            poly.splice(i+1, 0, new Point(0, 0))
+            i += 1
+        } else if (p1.y === 0 && p2.x === size) {
+            console.log('inserting top right')
+            poly.splice(i+1, 0, new Point(size, 0))
+            i += 1
+        }
+    }
+    return poly
+}
+
+/* const complete = (edges, vertices, size) => {
+    const verticesOnTop = vertices.filter(v => v.y === 0)
+    const verticesOnBottom = vertices.filter(v => v.y === size)
+    const verticesOnLeft = vertices.filter(v => v.x === 0)
+    const verticesOnRight = vertices.filter(v => v.x === size)
+    console.log(verticesOnTop, verticesOnRight, verticesOnBottom, verticesOnLeft)
+
+    if (verticesOnRight.length > 0) {
+        verticesOnRight.sort((a,b) => a.y - b.y)
+        const first = verticesOnRight[0]
+        const last = verticesOnRight[verticesOnRight.length - 1]
+        edges.push({ start: new Point(size, 0), end: first })
+        edges.push({ start: last, end: new Point(size, size)})
+    } else {
+        edges.push({ start: new Point(size, 0), end: new Point(size, size) })
+    }
+    if (verticesOnBottom.length > 0) {
+        verticesOnBottom.sort((a,b) => b.x - a.x)
+        const first = verticesOnBottom[0]
+        const last = verticesOnBottom[verticesOnBottom.length - 1]
+        edges.push({ start: new Point(size, size), end: first })
+        edges.push({ start: last, end: new Point(0, size)})
+    } else {
+        edges.push({ start: new Point(size, size), end: new Point(0, size) })
+    }
+
+    return edges
+} */
+
 let data = computeVoronoi(500)
-console.log('edges', data.edges)
+// let edges = complete(data.edges.slice(), data.vertices, 500)
+const edges = data.edges
+console.log('edges', edges)
 console.log('vertices', data.vertices)
-let vorResult = extractPolygonsAndAdjacency(data.edges)
+let vorResult = extractPolygonsAndAdjacency(edges, 500)
 console.log('vorResult', vorResult)
 
 
@@ -324,6 +402,8 @@ export const createDefinitionForMapGame = (preferredSize) => {
         }
         game.events[id] = locked ? [] : [ 'click', 'contextmenu' ]
     }) */
+    
+    
     vorResult.polygons.forEach((poly, idx) => {
         let id = `id${idx}`
         let locked = false
@@ -335,6 +415,15 @@ export const createDefinitionForMapGame = (preferredSize) => {
         game.events[id] = locked ? [] : [ 'click', 'contextmenu' ]
     })
 
+    edges.forEach((e, idx) => {
+        let id = `e${idx}`
+        let locked = false
+        game.objects[id] = {
+            id,
+            internalData: { locked, color: 1 },
+            points: [[e.start.x-5, e.start.y-5], [e.start.x+5, e.start.y-5], [e.end.x+5, e.end.y+5], [e.end.x-5, e.end.y+5]]
+        }
+    })
 
     data.vertices.forEach((v, idx) => {
         let id = `v${idx}`
@@ -344,7 +433,6 @@ export const createDefinitionForMapGame = (preferredSize) => {
             internalData: { locked, color: 0 },
             points: [[v.x-5, v.y-5], [v.x+5, v.y-5], [v.x+5, v.y+5], [v.x-5, v.y+5]]
         }
-        game.events[id] = locked ? [] : [ 'click', 'contextmenu' ]
     })
 
 
