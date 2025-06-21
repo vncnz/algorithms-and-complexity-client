@@ -1,10 +1,14 @@
 import { VoronoiDiagram, Point , Edge } from './voronoi.js'
 
+// TODO Bisogna considerare sul bordo anche i nodi che si trovano a 499.999999999999 se il bordo è 500 (javascript ed i floating points si odiano davvero!)
+// TODO Bisogna sistemare il caso in cui vanno creati triangoli vicino ai vertici del campo di gioco perché con un edge unico non viene creato un poly
+// * Può essere che convenga cambiare strategia ed anziché correggete i poligoni fare in modo che ci siano edges in più PRIMA di calcolare i poligoni
+
 let computeVoronoi = (size) => {
     console.log('computeVoronoi', size)
     let points = [
-        new Point(size * 0.3, 0),
-        new Point(size * 0.7, 0),
+        // new Point(size * 0.3, 0),
+        // new Point(size * 0.7, 0),
         // new Point(size + 10, size * 0.5),
         // new Point(size * 0.5, size + 10),
         // new Point(-10, size * 0.5),
@@ -15,7 +19,9 @@ let computeVoronoi = (size) => {
         new Point(200,160),
         new Point(250,250)
         // new Point(size, size)
-    ];
+    ]
+    points.push(new Point(Math.random() * size, Math.random() * size))
+    points.push(new Point(Math.random() * size, Math.random() * size))
 
     console.log('points', points)
 
@@ -42,7 +48,7 @@ let extractPolygonsAndAdjacency = (edges, size) => {
 
     const polygons = new Map();     // id → lista di punti (vertici)
     const adjacency = new Set();    // string "i-j"
-    const borderCells = new Set();
+    // const borderCells = new Set();
 
     for (const { start, end, arc: { left, right } } of edges) {
         // assegna id a left/right se ancora non mappati
@@ -57,23 +63,23 @@ let extractPolygonsAndAdjacency = (edges, size) => {
             polygons.set(lid,
                 (polygons.get(lid) || []).concat([start, end])
             );
-        } else {
+        }/* else {
             borderCells.add(rid);
-        }
+        }*/
         if (rid != null) {
             polygons.set(rid,
                 (polygons.get(rid) || []).concat([end, start])
             );
-        } else {
+        }/* else {
             borderCells.add(lid);
-        }
+        }*/
 
         if (lid != null && rid != null) {
             const key = lid < rid ? `${lid}-${rid}` : `${rid}-${lid}`;
             adjacency.add(key);
         }
     }
-    console.log('borders', borderCells)
+    // console.log('borders', borderCells)
 
     const finalPolygons = Array.from(polygons.entries()).map(
         ([id, pts]) => {
@@ -108,9 +114,8 @@ let extractPolygonsAndAdjacency = (edges, size) => {
 }
 
 let completePoly = (poly, size) => {
-    // TODO: valutare se questa è la scelta migliore e nel caso gestire il salto eventuale di un intero lato
-    // * L'alternativa è che si mettano dei punti sentinella nei posti giusti
-    // ! Attenzione anche al fatto che funziona solo se ci sono poligoni incompleti con almeno due edges e bisogna capire perché
+    // TODO: valutare se questa è la scelta migliore
+    // ! Attenzione anche al fatto che funziona solo se ci sono poligoni incompleti con almeno due edges, il motivo è che un edge solo non crea un poly
     console.log('ppoly', poly)
     for (let i=0; i<poly.length; i++) {
         let p1 = poly[i]
@@ -132,240 +137,46 @@ let completePoly = (poly, size) => {
             console.log('inserting top right')
             poly.splice(i+1, 0, new Point(size, 0))
             i += 1
+        } else if (p1.x === 0 && p2.x === size) {
+            console.log('inserting top left+right')
+            poly.splice(i+1, 0, new Point(0, 0))
+            poly.splice(i+2, 0, new Point(size, 0))
+            i += 2
+        } else if (p1.y === 0 && p2.y === size) {
+            console.log('inserting top+bottom right')
+            poly.splice(i+1, 0, new Point(size, 0))
+            poly.splice(i+2, 0, new Point(size, size))
+            i += 2
+        } else if (p1.x === size && p2.x === 0) {
+            console.log('inserting bottom left+right')
+            poly.splice(i+1, 0, new Point(size, size))
+            poly.splice(i+2, 0, new Point(0, size))
+            i += 2
+        } else if (p1.y === size && p2.y === 0) {
+            console.log('inserting top+bottom left')
+            poly.splice(i+1, 0, new Point(0, size))
+            poly.splice(i+2, 0, new Point(0, 0))
+            i += 2
         }
     }
     return poly
 }
 
-/* const complete = (edges, vertices, size) => {
-    const verticesOnTop = vertices.filter(v => v.y === 0)
-    const verticesOnBottom = vertices.filter(v => v.y === size)
-    const verticesOnLeft = vertices.filter(v => v.x === 0)
-    const verticesOnRight = vertices.filter(v => v.x === size)
-    console.log(verticesOnTop, verticesOnRight, verticesOnBottom, verticesOnLeft)
-
-    if (verticesOnRight.length > 0) {
-        verticesOnRight.sort((a,b) => a.y - b.y)
-        const first = verticesOnRight[0]
-        const last = verticesOnRight[verticesOnRight.length - 1]
-        edges.push({ start: new Point(size, 0), end: first })
-        edges.push({ start: last, end: new Point(size, size)})
-    } else {
-        edges.push({ start: new Point(size, 0), end: new Point(size, size) })
-    }
-    if (verticesOnBottom.length > 0) {
-        verticesOnBottom.sort((a,b) => b.x - a.x)
-        const first = verticesOnBottom[0]
-        const last = verticesOnBottom[verticesOnBottom.length - 1]
-        edges.push({ start: new Point(size, size), end: first })
-        edges.push({ start: last, end: new Point(0, size)})
-    } else {
-        edges.push({ start: new Point(size, size), end: new Point(0, size) })
-    }
-
-    return edges
-} */
-
-let data = computeVoronoi(500)
-// let edges = complete(data.edges.slice(), data.vertices, 500)
-const edges = data.edges
-console.log('edges', edges)
-console.log('vertices', data.vertices)
-let vorResult = extractPolygonsAndAdjacency(edges, 500)
-console.log('vorResult', vorResult)
-
-
-let color1 = 'hsl(0, 70%, 60%)'
-let color2 = 'hsl(60, 70%, 50%)'
-let color3 = "hsl(20, 40%, 50%)"
-let color4 = "hsl(100, 40%, 50%)"
+let color1 = 'hsl(0, 70%, 70%)'
+let color2 = 'hsl(60, 70%, 60%)'
+let color3 = "hsl(20, 40%, 60%)"
+let color4 = "hsl(100, 40%, 60%)"
 let colors = [color1, color2, color3, color4]
 
-let p1 = [0,730]
-let p2 = [384,730]
-let p3 = [530,862]
-let p4 = [0,50]
-let p5 = [432,480]
-let p6 = [240,670]
-let p7 = [240,730]
-let p8 = [534,382]
-let p9 = [816,666]
-let p10 = [624,862]
-let p11 = [826,380]
-let p12 = [1000,190]
-let p13 = [1000,480]
-let p14 = [430,0]
-let p15 = [634,380]
-let p16 = [720,290]
-
-let polygons = [
-    [p1, p2, p3, [0,862]],
-    [p4, p5, p6, p7, p1],
-    [p8, p9, p10, p3, p2, p7, p6],
-    [p8, p11, p12, p13, p9],
-    [p14, [1000,0], p12, p11, p15, p16],
-    [p4, [0,0], p14, p16, p15, p8, p5],
-    [p13, [1000,862], p10]
-]
-
-let near = [
-    [0, 1],
-    [0, 2],
-    [1, 2],
-    [1, 5],
-    [2, 3],
-    [2, 5],
-    [2, 6],
-    [3, 4],
-    [3, 5],
-    [3, 6],
-    [4, 5]
-]
-
-/* VONOROI */
-const dist = (a,b) => {
-    // Esiste anche Math.hypot(a.x-b.x, a.y-b.y) ma non lo usa nessuno!
-    let sqx = Math.pow(a.x-b.x, 2)
-    let sqy = Math.pow(a.y-b.y, 2)
-    return Math.pow(sqx+sqy, .5)
-}
-let circumcircle = (triangle) => {
-  const [A,B,C] = triangle
-  const D = 2*(A.x*(B.y-C.y) + B.x*(C.y-A.y) + C.x*(A.y-B.y))
-  const Ux = ((A.x*A.x + A.y*A.y)*(B.y - C.y) + (B.x*B.x + B.y*B.y)*(C.y - A.y) + (C.x*C.x + C.y*C.y)*(A.y - B.y)) / D
-  const Uy = ((A.x*A.x + A.y*A.y)*(C.x - B.x) + (B.x*B.x + B.y*B.y)*(A.x - C.x) + (C.x*C.x + C.y*C.y)*(B.x - A.x)) / D
-  const center = {x: Ux, y: Uy}
-  return {center, r: dist(center, A)}
-}
-let insideCircum = (p, tri) => {
-  const {center, r} = circumcircle(tri)
-  return dist(p, center) < r * (1 - 1e-6)
-}
-let edgeKey = (a,b) => {
-  return [a.x,b.x,a.y,b.y].sort().join(',')
-}
-// ---------- Bowyer-Watson start ----------
-let delaunay = (pts, W, H) => {
-  const superTri = [
-    {x: -W*10, y: -H*10},
-    {x:  W*10, y: -H*10},
-    {x: 0, y:  H*20}
-  ];
-  let triangles = [superTri];
-
-  pts.forEach(p => {
-    const bad = triangles.filter(tri => insideCircum(p, tri));
-    const edgeCount = {};
-    bad.forEach(tri => {
-      [[tri[0],tri[1]], [tri[1],tri[2]], [tri[2],tri[0]]].forEach(([a,b]) => {
-        const key = edgeKey(a,b);
-        edgeCount[key] = edgeCount[key] ? null : [a,b]; // edge seen twice = shared = remove
-      });
-    });
-    const borderEdges = Object.values(edgeCount).filter(e => e);
-    triangles = triangles.filter(tri => !bad.includes(tri));
-    triangles.push(...borderEdges.map(([a,b]) => [a,b,p]));
-  });
-
-  // Remove triangles using super triangle points
-  return triangles.filter(tri => !tri.some(p => superTri.includes(p)));
-}
-// ---------- Bowyer-Watson end ------------
-
-let clipPolygon = (polygon, {xMin, yMin, xMax, yMax}) => {
-  const clip = (poly, inside, intersect) =>
-    poly.reduce((out, p1, i) => {
-      const p0 = poly[(i - 1 + poly.length) % poly.length];
-      const i0 = inside(p0), i1 = inside(p1);
-      if (i0 && i1) out.push(p1);
-      else if (i0 && !i1) out.push(intersect(p0, p1));
-      else if (!i0 && i1) out.push(intersect(p0, p1), p1);
-      return out;
-    }, []);
-
-  let poly = polygon;
-  poly = clip(poly, p => p.x >= xMin, (a, b) => intersectX(a, b, xMin));
-  poly = clip(poly, p => p.x <= xMax, (a, b) => intersectX(a, b, xMax));
-  poly = clip(poly, p => p.y >= yMin, (a, b) => intersectY(a, b, yMin));
-  poly = clip(poly, p => p.y <= yMax, (a, b) => intersectY(a, b, yMax));
-  return poly;
-}
-
-const intersectX = (a, b, x) => {
-  const t = (x - a.x) / (b.x - a.x);
-  return { x, y: a.y + t * (b.y - a.y) };
-}
-const intersectY = (a, b, y) => {
-  const t = (y - a.y) / (b.y - a.y);
-  return { x: a.x + t * (b.x - a.x), y };
-}
-
-
-const N = 20;
-
-const generate = (N, size) => {
-
-    const points = Array.from({length: N}, () => ({ 
-        x: Math.random() * size, 
-        y: Math.random() * size
-    }));
-    points.push({x: 0, y: 0})
-    points.push({x: 0, y: size})
-    points.push({x: size, y: size})
-    points.push({x: size, y: 0})
-    console.log('points', points)
-
-    const triangles = delaunay(points, size, size)
-    /*
-    const cells = points.map(p => ({
-        site: p,
-        neighbors: new Set(),
-        verts: []
-    }));
-
-    // Map from point to its cell
-    const pointMap = new Map(points.map((p,i) => [p,i]));
-
-    triangles.forEach(tri => {
-        const cc = circumcircle(tri).center;
-        tri.forEach((p, i) => {
-            const i1 = (i+1)%3;
-            const a = pointMap.get(p);
-            const b = pointMap.get(tri[i1]);
-            if (a != null && b != null) {
-                cells[a].neighbors.add(b);
-                cells[b].neighbors.add(a);
-            }
-            if (a != null) cells[a].verts.push(cc)
-        })
-    })
-
-    return cells */
-
-    const pointMap = new Map(points.map(p => [p, { site: p, tris: [] }]));
-
-    triangles.forEach(tri => {
-        tri.forEach(p => pointMap.get(p)?.tris.push(tri));
-    });
-
-    const bounds = { xMin: 0, yMin: 0, xMax: size, yMax: size }
-    const cells = [...pointMap.values()].map(({site, tris}) => {
-        let centers = tris.map(t => circumcircle(t).center);
-        centers.sort((a,b) =>
-            Math.atan2(a.y - site.y, a.x - site.x) - Math.atan2(b.y - site.y, b.x - site.x)
-        );
-        centers = clipPolygon(centers, bounds);
-        return { site, polygon: centers };
-    });
-    return cells
-}
-
-// let triangles = generate(N, 500)
-// console.log(triangles)
-
-/* END */
-
 export const createDefinitionForMapGame = (preferredSize) => {
+
+    let data = computeVoronoi(500)
+    // let edges = complete(data.edges.slice(), data.vertices, 500)
+    const edges = data.edges
+    console.log('edges', edges)
+    console.log('vertices', data.vertices)
+    let vorResult = extractPolygonsAndAdjacency(edges, 500)
+    console.log('vorResult', vorResult)
 
     let game = {
         field: {
@@ -414,8 +225,9 @@ export const createDefinitionForMapGame = (preferredSize) => {
         }
         game.events[id] = locked ? [] : [ 'click', 'contextmenu' ]
     })
+    game.playStatus.internalData.adjacency = vorResult.adjacency
 
-    edges.forEach((e, idx) => {
+    /* edges.forEach((e, idx) => {
         let id = `e${idx}`
         let locked = false
         game.objects[id] = {
@@ -423,9 +235,9 @@ export const createDefinitionForMapGame = (preferredSize) => {
             internalData: { locked, color: 1 },
             points: [[e.start.x-5, e.start.y-5], [e.start.x+5, e.start.y-5], [e.end.x+5, e.end.y+5], [e.end.x-5, e.end.y+5]]
         }
-    })
+    }) */
 
-    data.vertices.forEach((v, idx) => {
+    /* data.vertices.forEach((v, idx) => {
         let id = `v${idx}`
         let locked = false
         game.objects[id] = {
@@ -433,7 +245,7 @@ export const createDefinitionForMapGame = (preferredSize) => {
             internalData: { locked, color: 0 },
             points: [[v.x-5, v.y-5], [v.x+5, v.y-5], [v.x+5, v.y+5], [v.x-5, v.y+5]]
         }
-    })
+    }) */
 
 
     drawField(game)
@@ -474,7 +286,7 @@ const drawField = (output) => {
 
 const checkWin = (output) => {
     let ok = true
-    near.forEach(couple => {
+    output.playStatus.internalData.adjacency.forEach(couple => {
         let c1 = Object.values(output.objects)[couple[0]].internalData.color
         let c2 = Object.values(output.objects)[couple[1]].internalData.color
         if (c1 == c2) {
