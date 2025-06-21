@@ -287,8 +287,8 @@ export class Point {
 		this.y = y;
 	}
 
-	toString () { //! FIXME: non fa l'override
-		return `x:${this.x},y:${this.y}`
+	toString () { //* non fa l'override, va chiamato manualmente
+		return `(${this.x}, ${this.y})`
 	}
 }
 

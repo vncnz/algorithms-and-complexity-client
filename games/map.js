@@ -22,6 +22,11 @@ let computeVoronoi = (size) => {
     ]
     points.push(new Point(Math.random() * size, Math.random() * size))
     points.push(new Point(Math.random() * size, Math.random() * size))
+    
+    // If random points are these we can see a problem: a strange polygon and a bad tassellation in bottom right vertex
+    // points.push(new Point(162.57037276825565, 236.95413317685276))
+    // points.push(new Point(436.8053650657244, 489.79331250649426))
+
 
     console.log('points', points)
 
@@ -82,7 +87,7 @@ let extractPolygonsAndAdjacency = (edges, size) => {
     // console.log('borders', borderCells)
 
     const finalPolygons = Array.from(polygons.entries()).map(
-        ([id, pts]) => {
+        ([id, pts], idx) => {
         const seen = new Set();
         let unique = pts.filter(p => {
             const k = `${p.x},${p.y}`;
@@ -100,6 +105,7 @@ let extractPolygonsAndAdjacency = (edges, size) => {
             Math.atan2(a.y - site.y, a.x - site.x) - Math.atan2(b.y - site.y, b.x - site.x)
         );
 
+        console.log(' Fixing poly', idx)
         unique = completePoly(unique, size)
 
         return { id, points: unique };
@@ -120,39 +126,48 @@ let completePoly = (poly, size) => {
     for (let i=0; i<poly.length; i++) {
         let p1 = poly[i]
         let p2 = poly[(i+1) % poly.length]
+        console.log(p1.toString(), 'and', p2.toString())
+        if (p1.x < 1e-6) { if (p1.x !== size) {console.log('under threshold')} p1.x = 0; }
+        if (p1.y < 1e-6) { if (p1.y !== size) {console.log('under threshold')} p1.y = 0; }
+        if (p2.x < 1e-6) { if (p2.x !== size) {console.log('under threshold')} p2.x = 0; }
+        if (p2.y < 1e-6) { if (p2.y !== size) {console.log('under threshold')} p2.y = 0; }
+        if (p1.x > size - 1e-6) { if (p1.x !== size) {console.log('under threshold')} p1.x = size; }
+        if (p1.y > size - 1e-6) { if (p1.y !== size) {console.log('under threshold')} p1.y = size; }
+        if (p2.x > size - 1e-6) { if (p2.x !== size) {console.log('under threshold')} p2.x = size; }
+        if (p2.y > size - 1e-6) { if (p2.y !== size) {console.log('under threshold')} p2.y = size; }
         if (p1.x === size && p2.y === size) {
-            console.log('inserting bottom right between', p1, 'and', p2)
+            console.log('inserting bottom right between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(size, size))
             i += 1
         } else if (p1.y === size && p2.x === 0) {
-            console.log('inserting bottom left between', p1, 'and', p2)
+            console.log('inserting bottom left between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(0, size))
             i += 1
         } else if (p1.x === 0 && p2.y === 0) {
-            console.log('inserting top left between', p1, 'and', p2)
+            console.log('inserting top left between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(0, 0))
             i += 1
         } else if (p1.y === 0 && p2.x === size) {
-            console.log('inserting top right between', p1, 'and', p2)
+            console.log('inserting top right between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(size, 0))
             i += 1
         } else if (p1.x === 0 && p2.x === size) {
-            console.log('inserting top left+right between', p1, 'and', p2)
+            console.log('inserting top left+right between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(0, 0))
             poly.splice(i+2, 0, new Point(size, 0))
             i += 2
         } else if (p1.y === 0 && p2.y === size) {
-            console.log('inserting top+bottom right between', p1, 'and', p2)
+            console.log('inserting top+bottom right between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(size, 0))
             poly.splice(i+2, 0, new Point(size, size))
             i += 2
         } else if (p1.x === size && p2.x === 0) {
-            console.log('inserting bottom left+right between', p1, 'and', p2)
+            console.log('inserting bottom left+right between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(size, size))
             poly.splice(i+2, 0, new Point(0, size))
             i += 2
         } else if (p1.y === size && p2.y === 0) {
-            console.log('inserting top+bottom left between', p1, 'and', p2)
+            console.log('inserting top+bottom left between', p1.toString(), 'and', p2.toString())
             poly.splice(i+1, 0, new Point(0, size))
             poly.splice(i+2, 0, new Point(0, 0))
             i += 2
