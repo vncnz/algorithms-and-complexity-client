@@ -73,7 +73,20 @@ Si è comunque mantenuta la presenza delle coordinate `x` ed `y` per gli oggetti
 
 ## Posizionamento delle eventuali scritte all'interno dei poligoni
 
-Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima versione utilizzava il centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non funziona bene per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro. L'evoluzione è stato quindi ...........................
+Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima versione utilizzava il centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non funziona bene per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro. L'evoluzione è stato quindi ........TODO...................
+
+# Minesweeper
+## Funzionamento generale...
+## Algoritmo di espansione...
+
+Flip
+# Funzionamento generale...
+
+# Map
+## Funzionamento generale...
+## Vonoroi...
+### Fortune's algorithm...
+### Completamento tassellamento...
 
 
 
@@ -81,7 +94,11 @@ Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima v
 
 
 
-
+# Screenshots from the games
+![minesweeper lose](./screenshots/minesweeper_end.png)
+![minesweeper running](./screenshots/minesweeper_running.png)
+![flip lose](./screenshots/flip_running.png)
+![map lose](./screenshots/map_running.png)
 
 
 
@@ -104,9 +121,9 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 - [x] IMPL: load and draw json data
 - [x] IMPL: method to get a clicked object
 - [x] IMPL: add local events to json
-- [/] GAME: Flip game
+- [x] GAME: Flip game
 - [x] GAME: Minesweeper game
-- [ ] GAME: map game
+- [/] GAME: map game
 - [ ] GAME: flood game
 
 ```
