@@ -1,7 +1,7 @@
 [=== Something awesome's coming === working on this! ===]
 
 # algorithms-and-complexity-client
-The client of my project for algorithms and complexity exam
+Matricola VR457811 - Progetto d'esame AA 2022/2023
 
 ## Obiettivo
 L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro [TODO finire]
