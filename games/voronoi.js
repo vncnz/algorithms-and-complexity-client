@@ -286,6 +286,10 @@ export class Point {
 		this.x = x;
 		this.y = y;
 	}
+
+	toString () { //! FIXME: non fa l'override
+		return `x:${this.x},y:${this.y}`
+	}
 }
 
 export class Edge {

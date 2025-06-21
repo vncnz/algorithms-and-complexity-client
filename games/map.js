@@ -5,7 +5,7 @@ import { VoronoiDiagram, Point , Edge } from './voronoi.js'
 // * Può essere che convenga cambiare strategia ed anziché correggete i poligoni fare in modo che ci siano edges in più PRIMA di calcolare i poligoni
 
 let computeVoronoi = (size) => {
-    console.log('computeVoronoi', size)
+    // console.log('computeVoronoi', size)
     let points = [
         // new Point(size * 0.3, 0),
         // new Point(size * 0.7, 0),
@@ -120,40 +120,39 @@ let completePoly = (poly, size) => {
     for (let i=0; i<poly.length; i++) {
         let p1 = poly[i]
         let p2 = poly[(i+1) % poly.length]
-        console.log(p1, p2)
         if (p1.x === size && p2.y === size) {
-            console.log('inserting bottom right')
+            console.log('inserting bottom right between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(size, size))
             i += 1
         } else if (p1.y === size && p2.x === 0) {
-            console.log('inserting bottom left')
+            console.log('inserting bottom left between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(0, size))
             i += 1
         } else if (p1.x === 0 && p2.y === 0) {
-            console.log('inserting top left')
+            console.log('inserting top left between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(0, 0))
             i += 1
         } else if (p1.y === 0 && p2.x === size) {
-            console.log('inserting top right')
+            console.log('inserting top right between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(size, 0))
             i += 1
         } else if (p1.x === 0 && p2.x === size) {
-            console.log('inserting top left+right')
+            console.log('inserting top left+right between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(0, 0))
             poly.splice(i+2, 0, new Point(size, 0))
             i += 2
         } else if (p1.y === 0 && p2.y === size) {
-            console.log('inserting top+bottom right')
+            console.log('inserting top+bottom right between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(size, 0))
             poly.splice(i+2, 0, new Point(size, size))
             i += 2
         } else if (p1.x === size && p2.x === 0) {
-            console.log('inserting bottom left+right')
+            console.log('inserting bottom left+right between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(size, size))
             poly.splice(i+2, 0, new Point(0, size))
             i += 2
         } else if (p1.y === size && p2.y === 0) {
-            console.log('inserting top+bottom left')
+            console.log('inserting top+bottom left between', p1, 'and', p2)
             poly.splice(i+1, 0, new Point(0, size))
             poly.splice(i+2, 0, new Point(0, 0))
             i += 2
