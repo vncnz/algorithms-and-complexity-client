@@ -60,6 +60,37 @@ let createSvgChild = (type, attrs, content) => {
     if (content) elm.innerHTML = content
     return elm
 }
+
+let computeCentroid = points => {
+    // https://en.wikipedia.org/wiki/Centroid
+    const len = points.length;
+    let area = 0
+    let c = {
+        x: 0,
+        y: 0
+    }
+    for (let i = 0; i < len; i++) {
+        const p0 = points[i]
+        const p1 = points[(i+1)%len] // Considering all sides!
+        const p0x = p0[0]
+        const p0y = p0[1]
+        const p1x = p1[0]
+        const p1y = p1[1]
+        const a = p0x * p1y - p1x * p0y;
+        area += a
+        c.x += (p0x + p1x) * a
+        c.y += (p0y + p1y) * a
+    }
+    area /= 2
+    if (area === 0) {
+        return points[0]
+    }
+    c.x /= (6 * area)
+    c.y /= (6 * area)
+    return c
+}
+
+
 let draw = () => {
     const svg = document.querySelector('svg')
     if (!svg) return
@@ -105,14 +136,15 @@ let draw = () => {
             // const tx = bbox.x + bbox.width/2
             // const ty = bbox.y + bbox.height/2
 
-            // For complex polygons (coo avg)
-            const tx = obj.points.map(p => p[0]).reduce((sum, el) => sum + el) / obj.points.length
-            const ty = obj.points.map(p => p[1]).reduce((sum, el) => sum + el) / obj.points.length
+            // For semi-complex polygons (coo avg)
+            // const tx = obj.points.map(p => p[0]).reduce((sum, el) => sum + el) / obj.points.length
+            // const ty = obj.points.map(p => p[1]).reduce((sum, el) => sum + el) / obj.points.length
+            let c = computeCentroid(obj.points)
 
 
             let text = createSvgChild('text', {
-                x: tx,
-                y: ty,
+                x: c.x,
+                y: c.y,
                 style: 'pointer-events: none'
             }, obj.text)
             svg.appendChild(text)
