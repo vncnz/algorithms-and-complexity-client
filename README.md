@@ -1,7 +1,7 @@
 [=== Something awesome's coming === working on this! ===]
 
 # algorithms-and-complexity-client
-Matricola VR457811 - Progetto d'esame AA 2022/2023
+Matricola VR457811 - Progetto d'esame AA 2024/2025
 
 ## Obiettivo
 L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro. Il client deve essere agnostico sulle logiche di gioco e sui componenenti grafici del gioco stesso e deve dipendere completamente dal server. Un'altra richiesta per il progetto è stato l'utilizzo di javascript vanilla: niente frameworks come Vue o Angular o di librerie grafiche complesse come d3.
