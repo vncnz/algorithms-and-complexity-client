@@ -106,22 +106,6 @@ let draw = () => {
     svg.setAttribute("viewBox", `0 0 ${game.field.width} ${game.field.height}`)
 
     Object.values(game.objects).forEach(obj => {
-        // const fromx = xpx * obj.rect.x
-        // const sizex = xpx * obj.rect.w
-        // const fromy = ypx * obj.rect.y
-        // const sizey = ypx * obj.rect.h
-        // console.log(fromx, fromy, sizex, sizey)
-
-        /* let rect = createSvgChild('rect', {
-            x: fromx,
-            y: fromy,
-            width: sizex,
-            height: sizey,
-            id: obj.id,
-            fill: obj.bgColor || "transparent",
-            stroke: 'gray'
-        })
-        svg.appendChild(rect) */
         let rect = createSvgChild('polygon', {
             points: obj.points.map(p => `${p[0]},${p[1]}`).join(' '),
             id: obj.id,
@@ -131,14 +115,16 @@ let draw = () => {
         svg.appendChild(rect)
 
         if (obj.text) {
-            // For simple polygons bbox center will be ok
+            // Version 1: for simple polygons bbox center will be ok
             // let bbox = rect.getBBox()
             // const tx = bbox.x + bbox.width/2
             // const ty = bbox.y + bbox.height/2
 
-            // For semi-complex polygons (coo avg)
+            // Version 2: for semi-complex polygons (coo avg)
             // const tx = obj.points.map(p => p[0]).reduce((sum, el) => sum + el) / obj.points.length
             // const ty = obj.points.map(p => p[1]).reduce((sum, el) => sum + el) / obj.points.length
+
+            // Version 3: using centroid
             let c = computeCentroid(obj.points)
 
 
