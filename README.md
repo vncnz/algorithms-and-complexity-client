@@ -4,11 +4,11 @@
 Matricola VR457811 - Progetto d'esame AA 2022/2023
 
 ## Obiettivo
-L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro. Il client deve essere agnostico sulle logiche di gioco e sui componenenti grafici del gioco stesso.
+L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro. Il client deve essere agnostico sulle logiche di gioco e sui componenenti grafici del gioco stesso e deve dipendere completamente dal server. Un'altra richiesta per il progetto è stato l'utilizzo di javascript vanilla: niente frameworks come Vue o Angular o di librerie grafiche complesse come d3.
 
 Sono attualmente implementati tre giochi, scelti per mostrare differenti potenzialità del progetto:
 - Flip: un gioco semplice per un'implementazione semplificata
-- Minesweepers: un gioco algoritmicamente più elaborato, con due diversi tipi di eventi, ma sempre a tassellamento regolare
+- Minesweeper: un gioco algoritmicamente più elaborato, con due diversi tipi di eventi, ma sempre a tassellamento regolare
 - Map: un gioco con un tassellamento irregolare
 
 Ogni gioco verrà descritto più avanti in maniera più approfondita.
@@ -24,7 +24,7 @@ L'idea di base per l'implementazione è di gestire il rendering lato client prin
 - gli eventi da catturare
 - lo stato della partita
 
-Lo stato della partita contiene informazioni basilari come la fase (Running/Win/Lose), un valore che indica il progresso (significativo in alcuni giochi, ad esempio in minesweepers per indicare la percentuale del campo di gioco già mostrato), un testo aggiuntivo (contenente ad esempio il numero di mine ancora da trovare, sempre in minesweepers).
+Lo stato della partita contiene informazioni basilari come la fase (Running/Win/Lose), un valore che indica il progresso (significativo in alcuni giochi, ad esempio in minesweeper per indicare la percentuale del campo di gioco già mostrato), un testo aggiuntivo (contenente ad esempio il numero di mine ancora da trovare, sempre in minesweeper).
 
 ## Canvas vs SVG
 
@@ -77,28 +77,49 @@ Gli svantaggi sono i seguenti:
 - Maggiore payload nelle comunicazioni, in quanto non viaggiano solo gli aggiornamenti ma ogni informazione legata al gioco ed alla sua UI
 
 
-## Oggetti grafici del gioco
+## Rappresentazione degli oggetti grafici del gioco
 
 Per quanto riguarda la rappresentazione degli oggetti del gioco, come per la scelta tra canvas e svg, il progetto è stato inizialmente implementato in un modo ma col procedere degli sviluppi si è proceduto ad un refactoring per aumentare l'elasticità della soluzione.
 
+### Prima versione
 L'implementazione iniziale vedeva gli oggetti rappresentati tramite delle coordinate all'interno di un tavolo considerato a scacchiera: il server inviava quindi la definizione del tavolo di gioco come una coppia di valori pari al numero di righe ed al numero di colonne in cui dividere il tavolo ed ogni oggetto aveva, tra le proprie caratteristiche, una posizione definita come coppia di coordinate che rappresentassero la cella di destinazione.
 
+### Seconda versione (attuale)
 Nell'implementazione corrente gli oggetti vengono descritti tramite liste di coordinate dei vertici, questo consente di avere forme irregolari se necessario.
 L'eventuale testo dell'oggetto viene visualizzato al centro del rettangolo che si ottiene con la funzione `HTMLelement.getBBox()`, che restituisce un rettangolo che circoscrive l'intero poligono. Questa logica funziona bene per poligoni regolari, come quadrati o rettangoli, ma anche per poligoni irregolari che mantengono una forma convessa e con vertici che hanno distanze dal baricentro non troppo differenti. È possibile, come evolutiva, implementare un algoritmo più complesso e costruire una funzione di calcolo del baricentro della figura.
 Si è comunque mantenuta la presenza delle coordinate `x` ed `y` per gli oggetti in quei giochi che hanno un tavolo di gioco a scacchiera, non ai fini del rendering ma come supporto per i calcoli di vicinanza tra le celle. Queste coordinate non sono quindi più coordinate grafiche, legate alla dimensione del tavolo di gioco in pixel, ma indici di riga e colonna.
 
+Ogni oggetto di gioco ha inoltre un id ed un oggetto interno chiamato `internalData`, che il client non utilizza, necessario per il server nelle comunicazioni che aggiornano lo stato di gioco. Questo oggetto può contenere, ad esempio, le coordinate delle celle nel caso di un gioco con una disposizione a scacchiera, ma anche informazioni sul contenuto di una cella nascosta all'utente o altro.
+
 
 ## Posizionamento delle eventuali scritte all'interno dei poligoni
 
-Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima versione utilizzava il centro del rettangolo contenente il poligono. Tale rettangolo può essere ottenuto dal DOM tramite la funzione `getBBox` definita per qualunque `SVGGraphicsElement`, cioé qualunque elemento facente parte di un `svg`.
-Una prima miglioria è stata implementare il calcolo del centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non é però ottimale per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro. L'ultima evoluzione è stata quindi il calcolo del centroide, cioé il centro geometrico. Si tratta di un calcolo un poco più complesso, che tiene in considerazione anche il concetto di area e che consente di ottenere un buon posizionamento del testo anche con poligoni dalla forma molto irregolare.
+Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti.
+
+### Prima versione
+Una prima versione utilizzava il centro del rettangolo contenente il poligono. Tale rettangolo può essere ottenuto dal DOM tramite la funzione `getBBox` definita per qualunque `SVGGraphicsElement`, cioé qualunque elemento facente parte di un `svg`.
+
+### Seconda versione
+Una prima miglioria è stata implementare il calcolo del centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non é però ottimale per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro.
+
+### Terza versione (attuale)
+L'ultima evoluzione è stata quindi il calcolo del centroide, cioé il centro geometrico. Si tratta di un calcolo un poco più complesso, che tiene in considerazione anche il concetto di area e che consente di ottenere un buon posizionamento del testo anche con poligoni dalla forma molto irregolare.
 
 # Minesweeper
-## Funzionamento generale [TODO]
+Si tratta di una riproduzione del famoso gioco incluso in Windows fin da Windows 95 e chiamato "Campo minato" o "Prato fiorito" a seconda delle versioni. In questo progetto lo chiameremo col nome inglese "minesweeper".
+
+## Funzionamento generale
+Nel caso qualcuno sia appena arrivato da Marte: si parte con una griglia rettangolare in cui tutte le celle sono nascoste ed il gioco consiste nello scoprire tutte le celle che non contengono una mina. Ogni cella, quando viene scoperta, mostra il numero di celle contenenti mine tra le 8 celle che confinano con essa. E' inoltre possibile marcare con una bandierina le celle in cui si è convinti che ci sia una mina, così da ricordarsene e non rischiare di scoprire la relativa cella per distrazione.
+Cliccando con il tasto destro su una cella coperta la si marca con la bandierina, e cliccando col tasto destro su una bandierina la si rimuove.
+Cliccando col sinistro su una cella coperta oppure con la bandierina, la si scopre. Una volta coperta non è più possibile interagire con essa.
+
+![minesweeper lose](./screenshots/minesweeper_end.png)
+
 ## Algoritmo di espansione [TODO]
+![minesweeper running](./screenshots/minesweeper_running.png)
 
 # Flip
-# Funzionamento generale [TODO]
+## Funzionamento generale [TODO]
 
 # Map
 ## Funzionamento generale [TODO]
@@ -113,8 +134,6 @@ Una prima miglioria è stata implementare il calcolo del centro geometrico, calc
 
 
 # Screenshots from the games
-![minesweeper lose](./screenshots/minesweeper_end.png)
-![minesweeper running](./screenshots/minesweeper_running.png)
 ![flip lose](./screenshots/flip_running.png)
 ![map lose](./screenshots/map_running.png)
 
