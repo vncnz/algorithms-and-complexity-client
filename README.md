@@ -6,6 +6,9 @@ Matricola VR457811 - Progetto d'esame AA 2022/2023
 ## Obiettivo
 L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro. Il client deve essere agnostico sulle logiche di gioco e sui componenenti grafici del gioco stesso e deve dipendere completamente dal server. Un'altra richiesta per il progetto è stato l'utilizzo di javascript vanilla: niente frameworks come Vue o Angular o di librerie grafiche complesse come d3.
 
+Il sito da cui è stata presa l'ispirazione per i giochi è il seguente:
+https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
+
 Sono attualmente implementati tre giochi, scelti per mostrare differenti potenzialità del progetto:
 - Flip: un gioco semplice per un'implementazione semplificata
 - Minesweeper: un gioco algoritmicamente più elaborato, con due diversi tipi di eventi, ma sempre a tassellamento regolare
@@ -17,6 +20,7 @@ Da un punto di vista più algoritmico, le parti interessanti sono:
 - Map contiene una tassellatura di Voronoi, creata tramite il Fortune's algorithm. Maggiori dettagli si possono trovare più avanti in questa relazione. Siccome il Fortune's algorithm fornisce non i poligoni ma una lista dei confini tra essi, è poi stato completato con un algoritmo che a partire dai lati individua e costruisce i poligoni
 
 Al momento non esiste un server e le comunicazioni con esso sono simulate tramite la chiamata, qualunque sia il gioco selezionato, di due specifiche funzioni dotate di un'interfaccia standard uguale per tutti i giochi.
+Per eseguire il codice è sufficiente, quindi, avere un qualunque server che esponga i file a partire dalla root di questo repository: si può usare l'estensione `live server` di vscode, il modulo httpserver di python (con `python3 -m http.server`) o qualunque altro modo.
 
 ## Idea di base per il client
 L'idea di base per l'implementazione è di gestire il rendering lato client principalmente tramite un elemento che consenta di visualizzare tutti gli oggetti legati al gioco ed i relativi eventi, inizialmente di tipo canvas ma poi sostituito con uno di tipo svg (vedi paragrafo dedicato). Questo svg viene aggiornato dopo aver ricevuto dal server un nuovo stato della partita in corso. Lo stato di una partita comprende concettualmente tre componenti:
