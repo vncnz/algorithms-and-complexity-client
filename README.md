@@ -73,20 +73,21 @@ Si è comunque mantenuta la presenza delle coordinate `x` ed `y` per gli oggetti
 
 ## Posizionamento delle eventuali scritte all'interno dei poligoni
 
-Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima versione utilizzava il centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non funziona bene per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro. L'evoluzione è stato quindi ........TODO...................
+Anche qui durante lo sviluppo sono stati effettuati dei cambiamenti. Una prima versione utilizzava il centro del rettangolo contenente il poligono. Tale rettangolo può essere ottenuto dal DOM tramite la funzione `getBBox` definita per qualunque `SVGGraphicsElement`, cioé qualunque elemento facente parte di un `svg`.
+Una prima miglioria è stata implementare il calcolo del centro geometrico, calcolato come la media delle coordinate di tutti i vertici. Questo metodo è semplice e veloce da applicare e funziona bene per oggetti dalla forma regolare o quasi regolare, non é però ottimale per oggetti che hanno vertici a distanze molto diverse tra loro dal centro, ad esempio in presenza di un vertice "sparato lontano" od un poligono concavo con un vertice molto vicino al centro. L'ultima evoluzione è stata quindi il calcolo del centroide, cioé il centro geometrico. Si tratta di un calcolo un poco più complesso, che tiene in considerazione anche il concetto di area e che consente di ottenere un buon posizionamento del testo anche con poligoni dalla forma molto irregolare.
 
 # Minesweeper
-## Funzionamento generale...
-## Algoritmo di espansione...
+## Funzionamento generale [TODO]
+## Algoritmo di espansione [TODO]
 
 # Flip
-# Funzionamento generale...
+# Funzionamento generale [TODO]
 
 # Map
-## Funzionamento generale...
-## Vonoroi...
-### Fortune's algorithm...
-### Completamento tassellamento...
+## Funzionamento generale [TODO]
+## Vonoroi [TODO]
+### Fortune's algorithm [TODO]
+### Completamento tassellamento [TODO]
 
 
 
