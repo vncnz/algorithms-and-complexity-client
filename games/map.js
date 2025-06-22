@@ -1,8 +1,7 @@
 import { VoronoiDiagram, Point , Edge } from './voronoi.js'
 
-// TODO Bisogna considerare sul bordo anche i nodi che si trovano a 499.999999999999 se il bordo è 500 (javascript ed i floating points si odiano davvero!)
-// TODO Bisogna sistemare il caso in cui vanno creati triangoli vicino ai vertici del campo di gioco perché con un edge unico non viene creato un poly
-// * Può essere che convenga cambiare strategia ed anziché correggete i poligoni fare in modo che ci siano edges in più PRIMA di calcolare i poligoni
+// TODO: Bisogna sistemare una situazione particolare, a righe 25-26 ci sono i nodi utili per riprodurre il caso problematico
+//* Può essere che convenga cambiare strategia ed anziché correggete i poligoni fare in modo che ci siano edges in più PRIMA di calcolare i poligoni
 
 let computeVoronoi = (size) => {
     // console.log('computeVoronoi', size)
