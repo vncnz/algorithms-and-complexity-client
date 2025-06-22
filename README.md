@@ -105,6 +105,7 @@ Una prima miglioria è stata implementare il calcolo del centro geometrico, calc
 ### Terza versione (attuale)
 L'ultima evoluzione è stata quindi il calcolo del centroide, cioé il centro geometrico. Si tratta di un calcolo un poco più complesso, che tiene in considerazione anche il concetto di area e che consente di ottenere un buon posizionamento del testo anche con poligoni dalla forma molto irregolare.
 
+
 # Minesweeper
 Si tratta di una riproduzione del famoso gioco incluso in Windows fin da Windows 95 e chiamato "Campo minato" o "Prato fiorito" a seconda delle versioni. In questo progetto lo chiameremo col nome inglese "minesweeper".
 
@@ -116,26 +117,35 @@ Cliccando col sinistro su una cella coperta oppure con la bandierina, la si scop
 ![minesweeper lose](./screenshots/minesweeper_end.png)
 
 ## Algoritmo di espansione [TODO]
+[Qui inserirò la descrizione dell'algoritmo di espansione]
+
 ![minesweeper running](./screenshots/minesweeper_running.png)
 
+
 # Flip
+
 ## Funzionamento generale [TODO]
+[Qui inserirò una descrizione del gioco]
+
+![flip running](./screenshots/flip_running.png)
+
 
 # Map
 ## Funzionamento generale [TODO]
-## Vonoroi [TODO]
-### Fortune's algorithm [TODO]
-### Completamento tassellamento [TODO]
+[Qui inserirò una descrizione del gioco]
 
-
-
-
-
-
-
-# Screenshots from the games
-![flip lose](./screenshots/flip_running.png)
 ![map lose](./screenshots/map_running.png)
+
+## Vonoroi [TODO]
+[Qui descriverò cos'è il Voronoi]
+
+### Fortune's algorithm [TODO]
+[Qui descriverò l'algoritmo]
+
+### Completamento tassellamento [TODO]
+[Qui descriverò la parte che dal risultato del Fortune's porta all'avere i poligoni]
+
+
 
 
 
