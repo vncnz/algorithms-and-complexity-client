@@ -65,6 +65,7 @@ export const simulateServerForMinesweeperGame = (objid, evtType, input) => {
         else obj.internalData.status = 'flag'
     } else {
         obj.internalData.status = 'seen'
+        delete output.events[obj.id]
         expand(obj, output)
     }
 
@@ -114,6 +115,7 @@ const expand = (obj, board) => {
             Object.values(board.objects).forEach(obj => {
                 if (Math.abs(obj.internalData.coo.x - x) < 2 && Math.abs(obj.internalData.coo.y - y) < 2 && !obj.internalData.mine && obj.internalData.status == 'untouched') {
                     obj.internalData.status = 'seen'
+                    delete board.events[obj.id]
                     if (!visited[obj.id] && countMines(obj.internalData.coo.x, obj.internalData.coo.y, board) === 0) {
                         frontier.push(obj)
                     }
