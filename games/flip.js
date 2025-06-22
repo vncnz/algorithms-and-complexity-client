@@ -1,5 +1,6 @@
-export const createDefinitionForFlipGame = () => {
+export const createDefinitionForFlipGame = (preferredSize) => {
     let sz = 4
+    const unit = preferredSize / sz
     let game = {
         field: {
             xsize: sz,
@@ -12,54 +13,57 @@ export const createDefinitionForFlipGame = () => {
         objects: {},
         events: {}
     }
-    let lightUp = 'hsl(0, 0%, 80%)'
-    let lightDown = "hsl(0, 0%, 20%)"
     for(let i = 0; i < sz; i++) {
         for(let j = 0; j < sz; j++) {
             let b = Math.random() > .5
             let id = j*sz + i
             game.objects[id] = {
                 id,
-                bgColor: b ? lightUp : lightDown,
-                fgColor: b ? 'black' : 'white',
-                rect: { x: i, y: j, w: 1, h: 1 },
-                // text: b ? '⧳' : '⧲',
-                text: `${j*sz + i}`, // '¤',
-                internalData: b
+                rect: { x: i, y: j },
+                internalData: { on: b },
+                points: [[i*unit, j*unit], [i*unit + unit, j*unit], [i*unit + unit, j*unit + unit], [i*unit, j*unit + unit]]
             }
             game.events[id] = [ 'click' ]
         }
     }
-    game.playStatus.progression = Object.values(game.objects).filter(o => !!o.internalData).length / Object.values(game.objects).length
+    drawField(game)
+    game.playStatus.progression = Object.values(game.objects).filter(o => o.internalData.on).length / Object.values(game.objects).length
     return game
 }
 
 
-export const simulateServerForFlipGame = (objs, evtType, input) => {
-    console.warn('Simulating server', objs, evtType, input)
+export const simulateServerForFlipGame = (objid, evtType, input) => {
+    console.warn('Simulating server', objid, evtType, input)
     let output = JSON.parse(JSON.stringify(input)) // simulo una comunicazione col server quindi non modifico l'oggetto corrente, ovviamente!
-    let obj = objs[0]
-    let lightUp = 'hsl(0, 0%, 80%)'
-    let lightDown = "hsl(0, 0%, 20%)"
+    let obj = output.objects[objid]
     Object.values(output.objects).forEach(o => {
-        let row = output.field.xsize
-        let xdiff = (o.id % row) - (obj % row)
-        let ydiff = Math.ceil((o.id + 1) / row) - Math.ceil((obj + 1) / row)
+        let xdiff = Math.abs(obj.rect.x - o.rect.x)
+        let ydiff = Math.abs(obj.rect.y - o.rect.y)
 
         if ((xdiff == 0 && Math.abs(ydiff) < 2) ||
             (ydiff == 0 && Math.abs(xdiff) < 2)) {
-                // console.log(`${o.id} has xdiff ${xdiff} and ydiff ${ydiff} from ${obj}`)
-            let b = !o.internalData
-            o.bgColor = b ? lightUp : lightDown
-            o.fgColor = b ? 'black' : 'white'
-            // o.text = b ? '⧳' : '⧲'
-            o.internalData = b
+            o.internalData.on = !o.internalData.on
         }
     })
-    output.playStatus.progression = Object.values(output.objects).filter(o => !!o.internalData).length / Object.values(output.objects).length
+    drawField(output)
+    output.playStatus.progression = Object.values(output.objects).filter(o => o.internalData.on).length / Object.values(output.objects).length
     if (output.playStatus.progression === 1) {
         output.playStatus.status = 'win'
-        Object.values(output.objects).forEach(o => o.events = [])
+        output.events = {}
     }
     return output
+}
+
+const drawField = (output) => {
+    let lightUp = 'hsl(0, 0%, 80%)'
+    let lightDown = "hsl(0, 0%, 20%)"
+    Object.values(output.objects).forEach(obj => {
+        if (obj.internalData.on) {
+            obj.text = '💡'
+            obj.bgColor = lightUp
+        } else {
+            obj.text = '🕯️'
+            obj.bgColor = lightDown
+        }
+    })
 }

@@ -24,6 +24,7 @@
 
 import { createDefinitionForFlipGame, simulateServerForFlipGame } from '/games/flip.js'
 import { createDefinitionForMinesweeperGame, simulateServerForMinesweeperGame } from '/games/minesweeper.js'
+import { createDefinitionForMapGame, simulateServerForMapGame } from '/games/map.js'
 
 const gameManagement = {
     flip: {
@@ -33,100 +34,159 @@ const gameManagement = {
     minesweeper: {
         createDefinition: createDefinitionForMinesweeperGame,
         simulateServer: simulateServerForMinesweeperGame
+    },
+    map: {
+        createDefinition: createDefinitionForMapGame,
+        simulateServer: simulateServerForMapGame
     }
 }
-const g = gameManagement.minesweeper
+let gameServer = null
+let game = null
+let size = 500
 
-let game = g.createDefinition()
+const chooseGame = choosen => {
+    console.log('chooseGame')
+    gameServer = choosen
+    game = gameServer.createDefinition(size)
+    draw()
+    bindEvents()
+}
 
-let xpx = 0
-let ypx = 0
+let createSvgChild = (type, attrs, content) => {
+    let elm = document.createElementNS('http://www.w3.org/2000/svg', type)
+    for (const [key, value] of Object.entries(attrs)) {
+        elm.setAttribute(key, value)
+    }
+    if (content) elm.innerHTML = content
+    return elm
+}
+
+let computeCentroid = points => {
+    // https://en.wikipedia.org/wiki/Centroid
+    const len = points.length;
+    let area = 0
+    let c = {
+        x: 0,
+        y: 0
+    }
+    for (let i = 0; i < len; i++) {
+        const p0 = points[i]
+        const p1 = points[(i+1)%len] // Considering all sides!
+        const p0x = p0[0]
+        const p0y = p0[1]
+        const p1x = p1[0]
+        const p1y = p1[1]
+        const a = p0x * p1y - p1x * p0y;
+        area += a
+        c.x += (p0x + p1x) * a
+        c.y += (p0y + p1y) * a
+    }
+    area /= 2
+    if (area === 0) {
+        return points[0]
+    }
+    c.x /= (6 * area)
+    c.y /= (6 * area)
+    return c
+}
+
 
 let draw = () => {
-    const canvas = document.querySelector('canvas')
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    ctx.font = "20px Arial";
+    const svg = document.querySelector('svg')
+    if (!svg) return
+    // ctx.font = "20px Arial";
+    svg.innerHTML = ""
+    svg.setAttribute("width", size)
+    svg.setAttribute("height", size)
 
-    const rect = canvas.getBoundingClientRect()
-    xpx = rect.width / game.field.xsize
-    ypx = rect.height / game.field.xsize
+    // const rect = svg.getBoundingClientRect()
+    // const xpx = rect.width / game.field.xsize
+    // const ypx = rect.height / game.field.xsize
+
+    svg.setAttribute("viewBox", `0 0 ${game.field.width} ${game.field.height}`)
 
     Object.values(game.objects).forEach(obj => {
-        ctx.fillStyle = obj.bgColor;
-        const fromx = xpx * obj.rect.x
-        const sizex = xpx * obj.rect.w
-        const fromy = ypx * obj.rect.y
-        const sizey = ypx * obj.rect.h
+        // const fromx = xpx * obj.rect.x
+        // const sizex = xpx * obj.rect.w
+        // const fromy = ypx * obj.rect.y
+        // const sizey = ypx * obj.rect.h
+        // console.log(fromx, fromy, sizex, sizey)
 
-        if (obj.bgColor) {
-            ctx.fillRect(fromx, fromy, sizex, sizey)
-            // console.log(`Drawing rect ${fromx}, ${fromy}, ${sizex}, ${sizey}`)
-        }
+        /* let rect = createSvgChild('rect', {
+            x: fromx,
+            y: fromy,
+            width: sizex,
+            height: sizey,
+            id: obj.id,
+            fill: obj.bgColor || "transparent",
+            stroke: 'gray'
+        })
+        svg.appendChild(rect) */
+        let rect = createSvgChild('polygon', {
+            points: obj.points.map(p => `${p[0]},${p[1]}`).join(' '),
+            id: obj.id,
+            fill: obj.bgColor || "transparent",
+            stroke: 'gray'
+        })
+        svg.appendChild(rect)
 
         if (obj.text) {
-            ctx.fillStyle = obj.fgColor;
-            const tx = fromx + sizex/2
-            const ty = fromy + sizey/2
-            let w = ctx.measureText(obj.text).width
-            ctx.fillText(obj.text, tx - w/2, ty + w/2)
-            // console.log(`Writing text "${obj.text}" at ${tx}, ${ty}`)
+            // For simple polygons bbox center will be ok
+            // let bbox = rect.getBBox()
+            // const tx = bbox.x + bbox.width/2
+            // const ty = bbox.y + bbox.height/2
+
+            // For semi-complex polygons (coo avg)
+            // const tx = obj.points.map(p => p[0]).reduce((sum, el) => sum + el) / obj.points.length
+            // const ty = obj.points.map(p => p[1]).reduce((sum, el) => sum + el) / obj.points.length
+            let c = computeCentroid(obj.points)
+
+
+            let text = createSvgChild('text', {
+                x: c.x,
+                y: c.y,
+                style: 'pointer-events: none'
+            }, obj.text)
+            svg.appendChild(text)
+            // let w = ctx.measureText(obj.text).width
+            //ctx.fillText(obj.text, tx - w/2, ty + w/2)
         }
     })
 
-    document.querySelector('#game-status').innerHTML = `${game.playStatus.status} (${Math.round(game.playStatus.progression * 100)}%)`
+    let to_output = [game.playStatus.status]
+    if (game.playStatus.progressionText) { to_output.push(`(${game.playStatus.progressionText})`) }
+    if (game.playStatus.progression) { to_output.push(`(${Math.round(game.playStatus.progression * 100)}%)`) }
+    document.querySelector('#game-status').innerHTML = to_output.join(' ')
     // ctx.fillStyle = "rgb(200 0 0)";
     // ctx.fillRect(10, 10, 50, 50);
 
     // ctx.fillStyle = "rgb(0 0 200 / 50%)";
     // ctx.fillRect(30, 30, 50, 50);
 }
-draw()
 
-const cellAt = (x, y) => {
-    return {
-        x: Math.floor(x / xpx),
-        y: Math.floor(y / ypx)
+let bindEvents = () => {
+    for (const [key, value] of Object.entries(game.events)) {
+        let elm = document.getElementById(key)
+        if (elm) {
+            value.forEach(evtType => {
+                elm.addEventListener(evtType, evt => {
+                    evt.preventDefault()
+                    game = gameServer.simulateServer(key, evtType, game)
+                    draw()
+                    bindEvents()
+                })
+            })
+        }
     }
 }
 
-const objectsAt = (x, y) => {
-    console.log('game.objects', game.objects)
-    const cell = cellAt(x, y)
-    const collisions = Object.values(game.objects).filter(obj =>
-        cell.x >= obj.rect.x &&
-        cell.x < obj.rect.x + obj.rect.w &&
-        cell.y >= obj.rect.y &&
-        cell.y < obj.rect.y + obj.rect.h
-    )
-    return collisions
-}
-
-let bindEvents = () => {
-    const canvas = document.querySelector('canvas')
-    if (!canvas) return
-
-    let canvasRect = canvas.getBoundingClientRect();
-
-    ['click', 'contextmenu'].forEach(evtType => {
-        canvas.addEventListener(evtType, evt => {
-            evt.preventDefault()
-            evt.stopImmediatePropagation()
-            console.log(evtType, evt)
-            const x = evt.pageX - canvasRect.left
-            const y = evt.pageY - canvasRect.top
-            console.log(x, y)
-            // const coo = cellAt(x, y)
-            const objs = objectsAt(x, y)
-            const withEvent = objs.filter(obj => (game.events[obj.id] || []).includes(evtType))
-            console.log(evtType, objs, withEvent)
-            if (withEvent.length) {
-                game = g.simulateServer(withEvent.map(o => o.id), evtType, game)
-                draw()
-            } else {
-                console.warn('No object with this event listener here!')
-            }
-        })
+chooseGame(gameManagement.map)
+new Array(...document.querySelectorAll('.game-chooser button')).forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (gameManagement[btn.getAttribute('game')]) {
+            chooseGame(gameManagement[btn.getAttribute('game')])
+        } else {
+            console.warn("Unknown game")
+        }
     })
-}
-bindEvents()
+})
