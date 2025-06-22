@@ -11,7 +11,7 @@ https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
 
 Sono attualmente implementati tre giochi, scelti per mostrare differenti potenzialità del progetto:
 - Flip: un gioco semplice per un'implementazione semplificata
-- Minesweeper: un gioco algoritmicamente più elaborato, con due diversi tipi di eventi, ma sempre a tassellamento regolare
+- Minesweeper: un gioco algoritmicamente più elaborato e con due diversi tipi di eventi, ma sempre a tassellamento regolare
 - Map: un gioco con un tassellamento irregolare
 
 Ogni gioco verrà descritto più avanti in maniera più approfondita.
