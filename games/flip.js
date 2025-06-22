@@ -19,8 +19,10 @@ export const createDefinitionForFlipGame = (preferredSize) => {
             let id = j*sz + i
             game.objects[id] = {
                 id,
-                rect: { x: i, y: j },
-                internalData: { on: b },
+                internalData: {
+                    on: b,
+                    coo: { x: i, y: j }
+                },
                 points: [[i*unit, j*unit], [i*unit + unit, j*unit], [i*unit + unit, j*unit + unit], [i*unit, j*unit + unit]]
             }
             game.events[id] = [ 'click' ]
@@ -37,8 +39,8 @@ export const simulateServerForFlipGame = (objid, evtType, input) => {
     let output = JSON.parse(JSON.stringify(input)) // simulo una comunicazione col server quindi non modifico l'oggetto corrente, ovviamente!
     let obj = output.objects[objid]
     Object.values(output.objects).forEach(o => {
-        let xdiff = Math.abs(obj.rect.x - o.rect.x)
-        let ydiff = Math.abs(obj.rect.y - o.rect.y)
+        let xdiff = Math.abs(obj.internalData.coo.x - o.internalData.coo.x)
+        let ydiff = Math.abs(obj.internalData.coo.y - o.internalData.coo.y)
 
         if ((xdiff == 0 && Math.abs(ydiff) < 2) ||
             (ydiff == 0 && Math.abs(xdiff) < 2)) {

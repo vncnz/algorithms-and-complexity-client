@@ -36,8 +36,11 @@ export const createDefinitionForMinesweeperGame = (preferredSize) => {
             // let b = game.playStatus.internalData.mines.includes(id)
             game.objects[id] = {
                 id,
-                rect: { x: i, y: j, w: 1, h: 1 },
-                internalData: { status: 'untouched', mine: mines.includes(id) },
+                internalData: {
+                    status: 'untouched',
+                    mine: mines.includes(id),
+                    coo: { x: i, y: j }
+                },
                 points: [[i*unit, j*unit], [i*unit + unit, j*unit], [i*unit + unit, j*unit + unit], [i*unit, j*unit + unit]]
             }
             game.events[id] = [ 'click', 'contextmenu' ]
@@ -95,7 +98,7 @@ export const simulateServerForMinesweeperGame = (objid, evtType, input) => {
 
 const countMines = (x, y, board) => {
     return Object.values(board.objects).filter(obj => {
-        return Math.abs(obj.rect.x - x) < 2 && Math.abs(obj.rect.y - y) < 2 && obj.internalData.mine
+        return Math.abs(obj.internalData.coo.x - x) < 2 && Math.abs(obj.internalData.coo.y - y) < 2 && obj.internalData.mine
     }).length
 }
 
@@ -105,13 +108,13 @@ const expand = (obj, board) => {
     while (frontier.length > 0) {
         obj = frontier.pop()
         visited[obj.id] = true
-        let x = obj.rect.x
-        let y = obj.rect.y
+        let x = obj.internalData.coo.x
+        let y = obj.internalData.coo.y
         if (countMines(x, y, board) === 0) {
             Object.values(board.objects).forEach(obj => {
-                if (Math.abs(obj.rect.x - x) < 2 && Math.abs(obj.rect.y - y) < 2 && !obj.internalData.mine && obj.internalData.status == 'untouched') {
+                if (Math.abs(obj.internalData.coo.x - x) < 2 && Math.abs(obj.internalData.coo.y - y) < 2 && !obj.internalData.mine && obj.internalData.status == 'untouched') {
                     obj.internalData.status = 'seen'
-                    if (!visited[obj.id] && countMines(obj.rect.x, obj.rect.y, board) === 0) {
+                    if (!visited[obj.id] && countMines(obj.internalData.coo.x, obj.internalData.coo.y, board) === 0) {
                         frontier.push(obj)
                     }
                 }
@@ -132,7 +135,7 @@ const drawField = (output) => {
                     obj.text = '💣'
                     obj.bgColor = bgMine
                 } else {
-                    let c = countMines(obj.rect.x, obj.rect.y, output)
+                    let c = countMines(obj.internalData.coo.x, obj.internalData.coo.y, output)
                     obj.text = `${c}`
                     obj.bgColor = bgGreen
                 }
