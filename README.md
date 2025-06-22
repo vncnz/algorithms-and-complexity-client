@@ -4,10 +4,27 @@
 Matricola VR457811 - Progetto d'esame AA 2022/2023
 
 ## Obiettivo
-L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro [TODO finire]
+L'obiettivo è creare un client in js che possa gestire tanti giochi diversi tra loro. Il client deve essere agnostico sulle logiche di gioco e sui componenenti grafici del gioco stesso.
 
-## Idea di base
-L'idea di base per l'implementazione è di gestire il rendering lato client principalmente tramite un elemento che consenta di visualizzare tutti gli oggetti legati al gioco ed i relativi eventi, inizialmente di tipo canvas ma poi sostituito con uno di tipo svg (vedi paragrafo dedicato).
+Sono attualmente implementati tre giochi, scelti per mostrare differenti potenzialità del progetto:
+- Flip: un gioco semplice per un'implementazione semplificata
+- Minesweepers: un gioco algoritmicamente più elaborato, con due diversi tipi di eventi, ma sempre a tassellamento regolare
+- Map: un gioco con un tassellamento irregolare
+
+Ogni gioco verrà descritto più avanti in maniera più approfondita.
+Da un punto di vista più algoritmico, le parti interessanti sono:
+- Minesweeper contiene un algoritmo di ricerca, utilizzato per espandere l'area scoperta nel caso l'utente clicchi su una cella contenente il valore 0. In tal caso, infatti, non viene scoperta solo la cella cliccata ma tutta l'area di 0 tra loro adiacenti, comprensivo del bordo formato da celle con valori diversi da 0
+- Map contiene una tassellatura di Voronoi, creata tramite il Fortune's algorithm. Maggiori dettagli si possono trovare più avanti in questa relazione. Siccome il Fortune's algorithm fornisce non i poligoni ma una lista dei confini tra essi, è poi stato completato con un algoritmo che a partire dai lati individua e costruisce i poligoni
+
+Al momento non esiste un server e le comunicazioni con esso sono simulate tramite la chiamata, qualunque sia il gioco selezionato, di due specifiche funzioni dotate di un'interfaccia standard uguale per tutti i giochi.
+
+## Idea di base per il client
+L'idea di base per l'implementazione è di gestire il rendering lato client principalmente tramite un elemento che consenta di visualizzare tutti gli oggetti legati al gioco ed i relativi eventi, inizialmente di tipo canvas ma poi sostituito con uno di tipo svg (vedi paragrafo dedicato). Questo svg viene aggiornato dopo aver ricevuto dal server un nuovo stato della partita in corso. Lo stato di una partita comprende concettualmente tre componenti:
+- gli oggetti da disegnare
+- gli eventi da catturare
+- lo stato della partita
+
+Lo stato della partita contiene informazioni basilari come la fase (Running/Win/Lose), un valore che indica il progresso (significativo in alcuni giochi, ad esempio in minesweepers per indicare la percentuale del campo di gioco già mostrato), un testo aggiuntivo (contenente ad esempio il numero di mine ancora da trovare, sempre in minesweepers).
 
 ## Canvas vs SVG
 
