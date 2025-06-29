@@ -120,6 +120,10 @@ Cliccando col sinistro su una cella coperta oppure con la bandierina, la si scop
 
 ![minesweeper lose](./screenshots/minesweeper_end.png)
 
+
+## Vittoria e progressione
+La progressione di gioco è calcolata come il rapporto tra le celle diverse dallo stato iniziale (quindi scoperte, oppure con una bandierina) sul totale delle celle. Quando la progressione di gioco è al 100% viene assegnata la vittoria. Nel caso venga invece scoperta una cella con una mina viene assegnata la sconfitta.
+
 ## Algoritmo di espansione
 [Qui inserirò la descrizione dell'algoritmo di espansione]
 Sono partito dall'idea dell'algoritmo A*, ma rimuovendo i concetti di punto d'arrivo, di priorità e di punteggio, implementando quindi sostanzialmente un algoritmo di tipo "region growing", modificato per l'utilizzo specifico in questo gioco.
@@ -148,7 +152,10 @@ Lo scopo di questo gioco riuscire ad accendere tutte le celle. Il campo è infat
 - spenta: sfondo scuro, icona di candela
 - accesa: sfondo chiaro, icona di lampadina accesa
 
-Ogni volta che si clicca su una cella vengono invertiti gli stati della cella stessa e delle quattro celle posizionate sopra, a destra, sotto e a sinistra di essa. Dal punto di vista algoritmico, questo gioco non presenta sfide particolari. La vittoria viene assegnata semplicemente verificando che tutte le celle siano accese, la progressione di gioco è il rapporto tra il numero di celle accese ed il numero di celle totali.
+Ogni volta che si clicca su una cella vengono invertiti gli stati della cella stessa e delle quattro celle posizionate sopra, a destra, sotto e a sinistra di essa. Dal punto di vista algoritmico, questo gioco non presenta sfide particolari.
+
+## Vittoria e progressione
+La vittoria viene assegnata semplicemente verificando che tutte le celle siano accese, la progressione di gioco è il rapporto tra il numero di celle accese ed il numero di celle totali.
 
 ![flip running](./screenshots/flip_running.png)
 
