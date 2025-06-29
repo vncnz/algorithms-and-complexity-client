@@ -174,33 +174,3 @@ La vittoria viene assegnata semplicemente verificando che tutte le celle siano a
 
 ### Completamento tassellamento [TODO]
 [Qui descriverò la parte che dal risultato del Fortune's porta all'avere i poligoni]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-
-## Site where to see games
-https://www.chiark.greenend.org.uk/~sgtatham/puzzles/
-
-## TODOs
-- [x] IMPL: Define a struct for json data
-- [x] IMPL: load and draw json data
-- [x] IMPL: method to get a clicked object
-- [x] IMPL: add local events to json
-- [x] GAME: Flip game
-- [x] GAME: Minesweeper game
-- [/] GAME: map game
-- [ ] GAME: flood game
-
-```
