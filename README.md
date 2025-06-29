@@ -161,8 +161,12 @@ La vittoria viene assegnata semplicemente verificando che tutte le celle siano a
 
 
 # Map
-## Funzionamento generale [TODO]
-[Qui inserirò una descrizione del gioco]
+## Funzionamento generale
+Lo scopo di questo gioco è colorare le diverse aree facendo in modo che due aree confinanti siano colorate con due colori differenti.
+Una colorazione con quattro colori è sempre possibile, qualunque sia la forma e la relazione di ciascuna area nei confronti delle altre aree, come conseguenza del teorema dei quattro colori, formulato in teoria dei grafi come "ogni grafo planare è 4-colorabile" e caso specifico di un più generale problema di colorazione. Esiste una formula per stabilire il numero minimo di colori necessari per colorare una superficie chiusa, se applicata ad una superficie piana si ottiene un numero pari, appunto, a quattro. Da un punto di vista algoritmico, questo gioco pone delle sfide non durante la partita del giocatore ma nella preparazione iniziale della stessa: doveva essere trovato un modo per generare in maniera casuale una mappa di gioco con delle aree dalla forma irregolare, che coprissero l'intero campo di gioco, tenendo anche traccia delle adiacente tra le aree. Si è scelto di utilizzare un tassellamento di tipo Voronoi.
+
+## Vittoria e progressione
+Ad ogni turno, l'applicazione verifica che per ogni coppia di adiacenze le due aree della coppia siano colorate con colori differenti. Non esiste un valore di progressione, in questo caso, né una situazione di sconfitta: l'utente può provare e riprovare finché non riesce a trovare la soluzione.
 
 ![map lose](./screenshots/map_running.png)
 
