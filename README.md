@@ -120,8 +120,23 @@ Cliccando col sinistro su una cella coperta oppure con la bandierina, la si scop
 
 ![minesweeper lose](./screenshots/minesweeper_end.png)
 
-## Algoritmo di espansione [TODO]
+## Algoritmo di espansione
 [Qui inserirò la descrizione dell'algoritmo di espansione]
+Sono partito dall'idea dell'algoritmo A*, ma rimuovendo i concetti di punto d'arrivo, di priorità e di punteggio, implementando quindi sostanzialmente un algoritmo di tipo "region growing", modificato per l'utilizzo specifico in questo gioco.
+L'idea dell'algoritmo che viene avviato a partire dallo scoprire una cella con valore zero da parte dell'utente è la seguente:
+- Si crea una lista, chiamata frontiera, contenente solo il nodo cliccato
+- Si crea una lista, inizialmente vuota, che ospiterà i nodi visitati
+- Iterando finché la frontiera non è vuota:
+  - Si rimuove un nodo dalla frontiera
+  - Si valutano tutti i suoi vicini:
+    - Se un nodo è già stato valutato, cioè é contenuto nella lista dei nodi visitati, viene ignorato
+    - Se un nodo contiene una mina, viene ignorato
+    - Se un nodo ha valore maggiore di zero, si scopre e si aggiunge alla lista dei nodi visitati
+    - Se un nodo ha valore zero, si scopre e si aggiunge alla frontiera
+
+L'ordine di estrazione dei nodi dalla frontiera è ciò che decide se la visita dell'albero è di tipo BFS, DFS o casuale, tuttavia non ha alcuna importanza ai fini dell'espansione dell'area visualizzata visto che il gioco viene aggiornato in maniera atomica una volta finita l'espansione.
+
+Con questo semplice algoritmo si migliora notevolmente l'esperienza del giocatore in quanto le parti interessanti del gioco riguardano l'individuazione delle mine ed espandere manualmente un'area coperta da valori zero è semplicemente ripetitivo.
 
 ![minesweeper running](./screenshots/minesweeper_running.png)
 
