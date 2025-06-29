@@ -172,6 +172,8 @@ Ad ogni turno, l'applicazione verifica che per ogni coppia di adiacenze le due a
 
 ## Vonoroi [TODO]
 [Qui descriverò cos'è il Voronoi]
+Dato un insieme di punti scelti, chiamati solitamente `seed`, il tassellamento di voronoi suddivide lo spazio in aree in cui ogni punto è più vicino al `seed` di tale area che a qualunque altro `seed`.
+Esistono differenti metodi per generare un tassellamento di questo punto. Una soluzione naive è calcolare, punto per punto, qual é il `seed` più vicino. Questa soluzione è molto pesante computazionalmente e non risolve il problema del conoscere le adiacenze tra le varie aree. Tra gli algoritmi più efficienti c'è il Fortune's algorithm, applicato in questo progetto e spiegato qui di seguito.
 
 ### Fortune's algorithm [TODO]
 [Qui descriverò l'algoritmo]
