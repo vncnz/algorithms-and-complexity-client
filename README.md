@@ -143,8 +143,12 @@ Con questo semplice algoritmo si migliora notevolmente l'esperienza del giocator
 
 # Flip
 
-## Funzionamento generale [TODO]
-[Qui inserirò una descrizione del gioco]
+## Funzionamento generale
+Lo scopo di questo gioco riuscire ad accendere tutte le celle. Il campo è infatti composto da una griglia di celle ed ogni cella può avere due stati:
+- spenta: sfondo scuro, icona di candela
+- accesa: sfondo chiaro, icona di lampadina accesa
+
+Ogni volta che si clicca su una cella vengono invertiti gli stati della cella stessa e delle quattro celle posizionate sopra, a destra, sotto e a sinistra di essa. Dal punto di vista algoritmico, questo gioco non presenta sfide particolari. La vittoria viene assegnata semplicemente verificando che tutte le celle siano accese, la progressione di gioco è il rapporto tra il numero di celle accese ed il numero di celle totali.
 
 ![flip running](./screenshots/flip_running.png)
 
