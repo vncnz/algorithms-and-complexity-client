@@ -174,7 +174,7 @@ Ad ogni turno, l'applicazione verifica che per ogni coppia di adiacenze le due a
 Dato un insieme di punti scelti, chiamati solitamente `seed`, il tassellamento di voronoi suddivide lo spazio in aree in cui ogni punto è più vicino al `seed` di tale area che a qualunque altro `seed`.
 Esistono differenti metodi per generare un tassellamento di questo punto. Una soluzione naive è calcolare, punto per punto, qual é il `seed` più vicino. Questa soluzione è molto pesante computazionalmente e non risolve il problema del conoscere le adiacenze tra le varie aree. Tra gli algoritmi più efficienti c'è il Fortune's algorithm, applicato in questo progetto e spiegato qui di seguito.
 
-### Fortune's algorithm [TODO]
+### Fortune's algorithm
 Il Fortune's algorithm è un algoritmo che permette di costruire un diagramma di Voronoi in 2D con una complessità di tempo O(n log n) e di spazio O(n), si tratta di un algoritmo di tipo "sweep line".
 L'algoritmo simula una linea orizzontale che parte da un lato e mentre questa attraversa il campo di gioco si aggiorna una mappa temporanea della parte di diagramma già calcolata.
 
@@ -192,7 +192,7 @@ Lungo l'attraversamento del campo di gioco da parte della sweepline i due tipi d
 - Site event: si aggiunge un nuovo arco nella beach line e si controlla poi se l'inserimento ha generato dei nuovi circle events
 - Circle event, ovvero la sparizione di un arco: quando tre archi consecutivi della beachline sono tangenti ad un cerchio e la sweepline raggiunge il fondo di tale cerchio, si ha un circle event. In questo caso, si aggiunge un nuovo segmento al diagramma, un arco sparisce e si verifica se come conseguenza di ciò si crea un nuovo circle event da gestire
 
-### Completamento tassellamento [TODO]
+### Completamento tassellamento
 Il Fortune's fornisce tutti i segmenti che separano le aree tra loro, ogni segmento mantiene un riferimento ai due nodi che si trovano nelle due aree che il segmento separa. È quindi possibile raccogliere per ciascun punto i segmenti che deliminato la relativa area e formare i poligoni da inviare al client per l'interazione con l'utente. Questo metodo non permette, tuttavia, di completare i poligoni che si trovano ai lati dell'area di gioco, ottenendo l'effetto che segue:
 
 ![incomplete_voronoi](./screenshots/incomplete_voronoi.png)
