@@ -176,7 +176,20 @@ Dato un insieme di punti scelti, chiamati solitamente `seed`, il tassellamento d
 Esistono differenti metodi per generare un tassellamento di questo punto. Una soluzione naive è calcolare, punto per punto, qual é il `seed` più vicino. Questa soluzione è molto pesante computazionalmente e non risolve il problema del conoscere le adiacenze tra le varie aree. Tra gli algoritmi più efficienti c'è il Fortune's algorithm, applicato in questo progetto e spiegato qui di seguito.
 
 ### Fortune's algorithm [TODO]
-[Qui descriverò l'algoritmo]
+Il Fortune's algorithm è un algoritmo che permette di costruire un diagramma di Voronoi in 2D con una complessità di tempo O(n log n) e di spazio O(n), si tratta di un algoritmo di tipo "sweep line".
+L'algoritmo simula una linea orizzontale che scende dall'alto verso il basso e mentre questa scende si aggiorna una mappa temporanea della parte di diagramma già calcolata.
+
+Gli elementi chiave dell'algoritmo sono i seguenti:
+- Sweepline: come già accennato, è una linea che attraversa l'intera area
+- Events queue: contiene tutti gli eventi ancora da processare, che possono essere di due tipi:
+  - Site event, quando la sweepline raggiunge un nuovo punto
+  - Circle event: quando un arco si restringe fino a sparire, ovvero quando tre siti formano un cerchio raggiunto dalla sweepline
+- Beach line: una struttura che tiene traccia degli archi parabolici attivi in un dato momento
+L'output dell'algoritmo è la lista di segmenti del diagramma di Voronoi
+
+Lungo l'attraversamento del campo di gioco da parte della sweepline i due tipi di eventi vengono così gestiti:
+- Site event: si aggiunge un nuovo arco nella beach line e si controlla poi se l'inserimento ha generato dei nuovi circle events
+- Circle event, ovvero la sparizione di un arco: quando tre archi consecutivi della beachline sono tangenti ad un cerchio e la sweepline raggiunge il fondo di tale cerchio, si ha un circle event. In questo caso, si aggiunge un nuovo segmento al diagramma, un arco sparisce e si verifica se come conseguenza di ciò si crea un nuovo circle event da gestire
 
 ### Completamento tassellamento [TODO]
 [Qui descriverò la parte che dal risultato del Fortune's porta all'avere i poligoni]
