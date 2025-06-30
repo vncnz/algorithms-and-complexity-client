@@ -170,14 +170,15 @@ Ad ogni turno, l'applicazione verifica che per ogni coppia di adiacenze le due a
 
 ![map lose](./screenshots/map_running.png)
 
-## Vonoroi [TODO]
-[Qui descriverò cos'è il Voronoi]
+## Vonoroi
 Dato un insieme di punti scelti, chiamati solitamente `seed`, il tassellamento di voronoi suddivide lo spazio in aree in cui ogni punto è più vicino al `seed` di tale area che a qualunque altro `seed`.
 Esistono differenti metodi per generare un tassellamento di questo punto. Una soluzione naive è calcolare, punto per punto, qual é il `seed` più vicino. Questa soluzione è molto pesante computazionalmente e non risolve il problema del conoscere le adiacenze tra le varie aree. Tra gli algoritmi più efficienti c'è il Fortune's algorithm, applicato in questo progetto e spiegato qui di seguito.
 
 ### Fortune's algorithm [TODO]
 Il Fortune's algorithm è un algoritmo che permette di costruire un diagramma di Voronoi in 2D con una complessità di tempo O(n log n) e di spazio O(n), si tratta di un algoritmo di tipo "sweep line".
-L'algoritmo simula una linea orizzontale che scende dall'alto verso il basso e mentre questa scende si aggiorna una mappa temporanea della parte di diagramma già calcolata.
+L'algoritmo simula una linea orizzontale che parte da un lato e mentre questa attraversa il campo di gioco si aggiorna una mappa temporanea della parte di diagramma già calcolata.
+
+![fortunes](./screenshots/Fortunes-algorithm.gif)
 
 Gli elementi chiave dell'algoritmo sono i seguenti:
 - Sweepline: come già accennato, è una linea che attraversa l'intera area
@@ -192,4 +193,15 @@ Lungo l'attraversamento del campo di gioco da parte della sweepline i due tipi d
 - Circle event, ovvero la sparizione di un arco: quando tre archi consecutivi della beachline sono tangenti ad un cerchio e la sweepline raggiunge il fondo di tale cerchio, si ha un circle event. In questo caso, si aggiunge un nuovo segmento al diagramma, un arco sparisce e si verifica se come conseguenza di ciò si crea un nuovo circle event da gestire
 
 ### Completamento tassellamento [TODO]
-[Qui descriverò la parte che dal risultato del Fortune's porta all'avere i poligoni]
+Il Fortune's fornisce tutti i segmenti che separano le aree tra loro, ogni segmento mantiene un riferimento ai due nodi che si trovano nelle due aree che il segmento separa. È quindi possibile raccogliere per ciascun punto i segmenti che deliminato la relativa area e formare i poligoni da inviare al client per l'interazione con l'utente. Questo metodo non permette, tuttavia, di completare i poligoni che si trovano ai lati dell'area di gioco, ottenendo l'effetto che segue:
+
+![incomplete_voronoi](./screenshots/incomplete_voronoi.png)
+
+Questo effetto è una conseguenza della chiusura dei segmenti utilizzando i soli segmenti ottenuti dall'algoritmo. Per completare la copertura due possibili soluzioni sono:
+- Tassellare un'area molto più ampia di quella che si vuole coprire
+- Inserire una serie di punti-sentinella lungo i bordi del campo di gioco
+- Completare manualmente i poligoni incompleti
+
+Siccome la prima soluzione non garantisce di coprire bene l'area desiderata, è stata provata la seconda soluzione ma i risultati non sono stati soddisfacenti: con pochi punti-sentinella l'area può non risultare ben coperta, con molto punti-sentinella si ha un brutto risultato estetico dovuto all'abbondanza di poligoni piccoli e acuti ai lati. La soluzione più pulita, semplice e che garantisce una copertura perfetta è la terza, soluzione che costituisce la versione attuale. Per completare i poligoni si verifica, per ogni poligono ottenuto, se possiede due vertici lungo i bordi dell'area da coprire. In tal caso, si aggiungono manualmente i segmenti necessari. Ad esempio, per il poligono numero 6 dell'immagine esemplificativa, uno spigolo si trova lungo il lato destro. Si aggiunge quindi un primo segmento che da tale punto arriva allo spigolo in basso a destra dell'area. Da lì, si aggiunge un altro segmento che arriva all'altro vertice attenzionato del poligono, che si trova lungo il lato inferiore, e la "correzione" del poligono è completata. Per il poligono numero 5 il ragionamento è il medesimo. Per il poligono numero 0, la situazione è ancora più particolare: il poligono possiede un vertice lungo il lato sinistro ed uno lungo il lato destro: è quindi necessario, aggiungere più segmenti in modo da coprire parte del lato sinistro, l'intero lato superiore e parte del lato destro, arrivando così all'altro vertice. A questo punto è stato fatto il giro completo e si può considerare conclusa la costruzione.
+
+A causa della scarsa precisione di Javascript nei calcoli in floating point, per verificare se un punto si trova lungo un bordo non viene verificata la perfetta uguaglianza a livello di coordinate ma viene concesso un margine di errore pari a 1e-6. Ad esempio, un punto si trova lungo il lato superiore se la sua coordinata y è minore di 1e-6.
