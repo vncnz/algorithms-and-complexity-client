@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+from sys import stdin, stdout, stderr
+import os
+import random
+
+from utilities import download_files
+
+def get_from_env (key, default):
+    if key in os.environ:
+        return os.environ[key]
+    return default
+
+def random_gen(m,n):
+    field = [ [] for _ in range(m) ]
+    for i in range(m):
+        for j in range(n):
+            field[i].append(random.randrange(2))
+    return field
+
+def state_as_str(m,n, field, tab_cols=0,tab_rows=0):
+    ans = "\n" * tab_rows
+    ans += f"{m} {n}"
+    for i in range(m):
+        ans += "\n" + " "*tab_cols + " ".join(map(str, field[i]))
+    return ans
+
+def state_as_arr (m, n, field):
+    return [el for row in field for el in row]
+
+def solved(m,n, field, tab=0):
+    for i in range(m):
+        for j in range(n):
+            if field[i][j] != 0:
+                return False
+    return True
+
+
+
+if __name__ == "__main__":
+    flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "log.txt"), "w")
+    print(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
+    errfs_list = [flog, stderr]
+
+    m = int(get_from_env("TAL_m", "4"))
+    n = int(get_from_env("TAL_n", "4"))
+    seed_str = get_from_env("TAL_seed", "")
+    seed = int(seed_str) if seed_str else random.randint(100000,999999)
+    #if "TAL_seed" in os.environ and os.environ["TAL_seed"] != "random":
+    #    seed = int(os.environ["TAL_seed"] or "")
+    print(f"Seed for this call to the service: {seed}.\n{m=}, {n=}", file=flog)
+    field = random_gen(m,n)
+    print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
+    print(state_as_arr(m,n, field))
+    num_moves = 0
+    still_playing = True
+    while still_playing:
+        i = int(input()) # map(int, input().strip().split())
+        r = int(i / 4)
+        c = i % 4
+        if i == -1:
+            still_playing = False
+            continue
+        # other special requests ...
+        
+        num_moves += 1
+        for rr in {r-1,r,r+1}:
+            if 0 <= rr < m:
+                field[rr][c] = 1 - field[rr][c]
+        for cc in {c-1,c+1}:
+            if 0 <= cc < n:
+                field[r][cc] = 1 - field[r][cc]
+        
+        print(state_as_arr(m,n, field))
+
+        print(f"Move {num_moves}: {r} {c}", file=flog)
+        print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
+        if solved(m,n, field):
+            still_playing = False
+            continue
+    flog.close()
+    
