@@ -54,28 +54,35 @@ if __name__ == "__main__":
     num_moves = 0
     still_playing = True
     while still_playing:
-        i = int(input()) # map(int, input().strip().split())
-        r = int(i / 4)
-        c = i % 4
-        if i == -1:
-            still_playing = False
-            continue
-        # other special requests ...
-        
-        num_moves += 1
-        for rr in {r-1,r,r+1}:
-            if 0 <= rr < m:
-                field[rr][c] = 1 - field[rr][c]
-        for cc in {c-1,c+1}:
-            if 0 <= cc < n:
-                field[r][cc] = 1 - field[r][cc]
-        
-        print(state_as_arr(m,n, field))
+        inp = input()
+        cmd, _, i = inp.partition(':')
+        if cmd == 'exit':
+            print("Received exit cmd", file=flog)
+            break
+        if cmd == 'click':
+            print(f"Received click cmd with param {i}", file=flog)
+            i = int(i) # map(int, input().strip().split())
+            r = int(i / 4)
+            c = i % 4
+            if i == -1:
+                still_playing = False
+                continue
+            # other special requests ...
+            
+            num_moves += 1
+            for rr in {r-1,r,r+1}:
+                if 0 <= rr < m:
+                    field[rr][c] = 1 - field[rr][c]
+            for cc in {c-1,c+1}:
+                if 0 <= cc < n:
+                    field[r][cc] = 1 - field[r][cc]
+            
+            print(state_as_arr(m,n, field))
 
-        print(f"Move {num_moves}: {r} {c}", file=flog)
-        print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
-        if solved(m,n, field):
-            still_playing = False
-            continue
+            print(f"Move {num_moves}: {r} {c}", file=flog)
+            print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
+            if solved(m,n, field):
+                still_playing = False
+                continue
     flog.close()
     
