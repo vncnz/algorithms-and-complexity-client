@@ -1,6 +1,6 @@
 import subprocess
 import threading
-import sys
+import sys, os
 
 def pipe(src, dst, tag=""):
     for line in src:
@@ -14,9 +14,15 @@ gui = subprocess.Popen(
     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
     text=True, bufsize=1
 )
+
+child_env = os.environ.copy()
+child_env["TAL_m"] = "4"
+child_env["TAL_n"] = "4"
+child_env["TAL_seed"] = "37545"
 sim = subprocess.Popen(
     [sys.executable, "flip/services/play.py"],
     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+    env=child_env,
     text=True, bufsize=1
 )
 
