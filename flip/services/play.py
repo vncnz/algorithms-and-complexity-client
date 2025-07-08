@@ -41,10 +41,11 @@ if __name__ == "__main__":
     print(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
     errfs_list = [flog, stderr]
 
-    m = int(get_from_env("TAL_m", "4"))
-    n = int(get_from_env("TAL_n", "4"))
+    m = int(get_from_env("TAL_m", "5"))
+    n = int(get_from_env("TAL_n", "5"))
     seed_str = get_from_env("TAL_seed", "")
     seed = int(seed_str) if seed_str else random.randint(100000,999999)
+    random.seed(seed)
     #if "TAL_seed" in os.environ and os.environ["TAL_seed"] != "random":
     #    seed = int(os.environ["TAL_seed"] or "")
     print(f"Seed for this call to the service: {seed}.\n{m=}, {n=}", file=flog)
