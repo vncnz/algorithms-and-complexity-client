@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import json
 import select
 from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem
@@ -7,6 +7,11 @@ from PyQt5.QtCore import QPointF, QTimer
 
 from functools import partial
 print_now = partial(print, flush=True)
+
+def get_from_env (key, default):
+    if key in os.environ:
+        return os.environ[key]
+    return default
 
 class ClickablePolygon(QGraphicsPolygonItem):
     def __init__(self, id, points, color):

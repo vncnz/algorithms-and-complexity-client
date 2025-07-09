@@ -1,22 +1,25 @@
-import sys
+import sys, os
 import json
 import select
 from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QWidget
 from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
 from PyQt5.QtCore import QPointF, QTimer
 
-from game_ui_common import print_now, ClickablePolygon, read_stdin_line
+from game_ui_common import print_now, ClickablePolygon, read_stdin_line, get_from_env
 
 polygons = []
 colors = [QColor("#ff9999"), QColor("#99ccff")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 scene = None
 
+m = int(get_from_env("TAL_m", "5"))
+n = int(get_from_env("TAL_n" ,"4"))
+
 def first_draw ():
     polygon_defs = []
-    for idx in range(16):
+    for idx in range(m * n):
         sz = 30
-        x = (idx % 4) * sz * 2
-        y = int(idx / 4) * sz * 2
+        x = (idx % n) * sz * 2
+        y = int(idx / n) * sz * 2
         polygon_defs.append((
             [(x-sz, y-sz), (x+sz, y-sz), (x+sz, y+sz), (x-sz, y+sz)],
             colors[0] # [idx % len(colors)]
