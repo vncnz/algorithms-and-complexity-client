@@ -1,6 +1,7 @@
 import subprocess
 import threading
 import sys, os
+from time import sleep
 
 def pipe(src, dst, tag=""):
     for line in src:
@@ -8,16 +9,18 @@ def pipe(src, dst, tag=""):
         dst.flush()
         print(f"{tag}{line.strip()}", file=sys.stderr)
 
+child_env = os.environ.copy()
+child_env["TAL_m"] = "3"
+child_env["TAL_n"] = "6"
+
 # Avvia i due processi
 gui = subprocess.Popen(
     [sys.executable, "game-ui.py"],
     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+    env=child_env,
     text=True, bufsize=1
 )
 
-child_env = os.environ.copy()
-child_env["TAL_m"] = "4"
-child_env["TAL_n"] = "4"
 child_env["TAL_seed"] = "37545"
 sim = subprocess.Popen(
     [sys.executable, "flip/services/play.py"],
@@ -37,4 +40,7 @@ t2.start()
 
 # attendi fino a quando uno non finisce
 gui.wait()
+
+sim.stdin.write("exit\n")
+sleep(1)
 sim.terminate()
