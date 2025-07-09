@@ -5,6 +5,9 @@ import random
 
 from utilities import download_files
 
+#from functools import partial
+#print_now = partial(print, flush=True)
+
 def get_from_env (key, default):
     if key in os.environ:
         return os.environ[key]
@@ -55,7 +58,12 @@ if __name__ == "__main__":
     num_moves = 0
     still_playing = True
     while still_playing:
-        inp = input()
+        print("waiting input", file=flog)
+        try:
+            inp = input()
+        except Exception as ex:
+            print(ex)
+        print(f"input {inp}", file=flog)
         cmd, _, i = inp.partition(':')
         if cmd == 'exit':
             print("Received exit cmd", file=flog)
@@ -63,8 +71,8 @@ if __name__ == "__main__":
         if cmd == 'click':
             print(f"Received click cmd with param {i}", file=flog)
             i = int(i) # map(int, input().strip().split())
-            r = int(i / 4)
-            c = i % 4
+            r = int(i / n)
+            c = i % n
             if i == -1:
                 still_playing = False
                 continue
