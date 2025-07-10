@@ -8,16 +8,23 @@ from utilities import download_files
 #from functools import partial
 #print_now = partial(print, flush=True)
 
+
+
 def get_from_env (key, default):
     if key in os.environ:
         return os.environ[key]
     return default
 
 def random_gen(m,n):
-    field = [ [] for _ in range(m) ]
-    for i in range(m):
-        for j in range(n):
-            field[i].append(random.randrange(2))
+    field = [ [0 for __ in range(n)] for _ in range(m) ]
+    # for i in range(m):
+    #     for j in range(n):
+    #        field[i].append(random.randrange(2))
+    for _ in range(int(n * m / 2)):
+        i = random.randrange(n*m)
+        r = int(i / n)
+        c = i % n
+        apply_move(r, c, field)
     return field
 
 def state_as_str(m,n, field, tab_cols=0,tab_rows=0):
@@ -37,6 +44,13 @@ def solved(m,n, field, tab=0):
                 return False
     return True
 
+def apply_move (r, c, field):
+    for rr in {r-1,r,r+1}:
+        if 0 <= rr < m:
+            field[rr][c] = 1 - field[rr][c]
+    for cc in {c-1,c+1}:
+        if 0 <= cc < n:
+            field[r][cc] = 1 - field[r][cc]
 
 
 if __name__ == "__main__":
@@ -79,12 +93,7 @@ if __name__ == "__main__":
             # other special requests ...
             
             num_moves += 1
-            for rr in {r-1,r,r+1}:
-                if 0 <= rr < m:
-                    field[rr][c] = 1 - field[rr][c]
-            for cc in {c-1,c+1}:
-                if 0 <= cc < n:
-                    field[r][cc] = 1 - field[r][cc]
+            apply_move(r, c, field)
             
             print(state_as_arr(m,n, field))
 
