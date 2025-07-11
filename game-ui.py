@@ -8,11 +8,11 @@ from PyQt5.QtCore import QPointF, QTimer
 from game_ui_common import print_now, ClickablePolygon, read_stdin_line, get_from_env
 
 polygons = []
-colors = [QColor("#ff9999"), QColor("#99ccff")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
+colors = [QColor("#666666"), QColor("#ff7799")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 scene = None
 
 m = int(get_from_env("TAL_m", "5"))
-n = int(get_from_env("TAL_n" ,"4"))
+n = int(get_from_env("TAL_n" ,"5"))
 
 def first_draw ():
     polygon_defs = []
@@ -36,9 +36,15 @@ def update_draw (data):
 
 def process_server_message(line):
     try:
-        msg = json.loads(line)
-        # print_now(f"Received: {msg}")
-        update_draw(msg)
+        cmd, _, data = line.partition(':')
+        if cmd == 'field':
+            msg = json.loads(data)
+            # print_now(f"Received: {msg}")
+            update_draw(msg)
+        elif cmd == 'hint':
+            msg = json.loads(data)
+            first_hint = msg.index(1)
+            polygons[first_hint].update_color(QColor('#ffdd44'))
     # except json.JSONDecodeError:
     #     print_now("Invalid JSON")
     except Exception as e:
@@ -71,13 +77,17 @@ def main(blocking=True):
     first_draw()
 
     # UI buttons
-    button = QPushButton("Exit")
-    button.clicked.connect(lambda: print_now("exit"))
+    btn_exit = QPushButton("Exit")
+    btn_exit.clicked.connect(lambda: print_now("exit:"))
+
+    btn_hint = QPushButton("Hint")
+    btn_hint.clicked.connect(lambda: print_now("hint:"))
 
     # Layout
     layout = QVBoxLayout()
     layout.addWidget(view)
-    layout.addWidget(button)
+    layout.addWidget(btn_exit)
+    layout.addWidget(btn_hint)
 
     window = QWidget()
     window.setLayout(layout)

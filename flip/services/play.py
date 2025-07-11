@@ -3,7 +3,8 @@ from sys import stdin, stdout, stderr
 import os
 import random
 
-from utilities import download_files
+# from utilities import download_files
+from flip_solver import solve_lights_out, unflatten_grid, flatten_grid
 
 #from functools import partial
 #print_now = partial(print, flush=True)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     print(f"Seed for this call to the service: {seed}.\n{m=}, {n=}", file=flog)
     field = random_gen(m,n)
     print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
-    print(state_as_arr(m,n, field))
+    print(f'field:{state_as_arr(m,n, field)}')
     num_moves = 0
     still_playing = True
     while still_playing:
@@ -95,12 +96,26 @@ if __name__ == "__main__":
             num_moves += 1
             apply_move(r, c, field)
             
-            print(state_as_arr(m,n, field))
+            print(f'field:{state_as_arr(m,n, field)}')
 
-            print(f"Move {num_moves}: {r} {c}", file=flog)
+            print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
             print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
             if solved(m,n, field):
                 still_playing = False
                 continue
+        elif cmd == 'hint':
+            print(f'HINT CALLED m={m} n={n} field={field}', file=flog)
+            # unflatten = unflatten_grid(field, n, m)
+            # print(f'unflatten:{unflatten} m={m} n={n}', file=flog)
+            grid = [
+                [0, 0, 0],
+                [1, 0, 1],
+                [1, 0, 1]
+            ]
+            solution = solve_lights_out(field)
+            if solution:
+                print(f'hint:{flatten_grid(solution)}')
+            else:
+                print(f'hint:')
     flog.close()
     

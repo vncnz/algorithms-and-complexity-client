@@ -5,6 +5,7 @@ from sys import stdin, stdout, stderr
 from os import environ
 import os.path
 from pathlib import Path
+import shutil
 
 
 def download_files(files:list):

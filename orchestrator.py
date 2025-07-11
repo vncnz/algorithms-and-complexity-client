@@ -11,7 +11,7 @@ def pipe(src, dst, tag=""):
 
 child_env = os.environ.copy()
 child_env["TAL_m"] = "3"
-child_env["TAL_n"] = "6"
+child_env["TAL_n"] = "3"
 
 # Avvia i due processi
 gui = subprocess.Popen(
@@ -41,6 +41,6 @@ t2.start()
 # attendi fino a quando uno non finisce
 gui.wait()
 
-sim.stdin.write("exit\n")
+sim.stdin.write("exit:\n")
 sleep(1)
 sim.terminate()
