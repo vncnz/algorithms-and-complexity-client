@@ -43,6 +43,7 @@ def process_server_message(line):
             update_draw(msg)
         elif cmd == 'hint':
             msg = json.loads(data)
+            # We get the full solution from the "server" but we show only the first cell to be pressed
             first_hint = msg.index(1)
             polygons[first_hint].update_color(QColor('#ffdd44'))
     # except json.JSONDecodeError:

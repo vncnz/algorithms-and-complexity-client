@@ -107,11 +107,6 @@ if __name__ == "__main__":
             print(f'HINT CALLED m={m} n={n} field={field}', file=flog)
             # unflatten = unflatten_grid(field, n, m)
             # print(f'unflatten:{unflatten} m={m} n={n}', file=flog)
-            grid = [
-                [0, 0, 0],
-                [1, 0, 1],
-                [1, 0, 1]
-            ]
             solution = solve_lights_out(field)
             if solution:
                 print(f'hint:{flatten_grid(solution)}')
