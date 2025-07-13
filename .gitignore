@@ -134,3 +134,4 @@ Screenshot from *.png
 /lib/*
 /lib64
 __pycache__/
+log.txt
