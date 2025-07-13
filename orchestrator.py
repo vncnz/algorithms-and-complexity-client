@@ -3,6 +3,10 @@ import threading
 import sys, os
 from time import sleep
 
+game = 'flip'
+if len(sys.argv) > 1:
+    game = sys.argv[1]
+
 def pipe(src, dst, tag=""):
     for line in src:
         dst.write(line)
@@ -23,7 +27,7 @@ gui = subprocess.Popen(
 
 child_env["TAL_seed"] = "37545"
 sim = subprocess.Popen(
-    [sys.executable, "flip/services/play.py"],
+    [sys.executable, game + "/services/play.py"],
     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
     env=child_env,
     text=True, bufsize=1
