@@ -1,7 +1,7 @@
 import sys, os
 import json
 import select
-from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
 from PyQt5.QtCore import QPointF, QTimer
 
@@ -86,9 +86,12 @@ def main(blocking=True):
 
     # Layout
     layout = QVBoxLayout()
+    layout_buttons = QHBoxLayout()
+    layout_buttons.addWidget(btn_exit)
+    layout_buttons.addWidget(btn_hint)
+
     layout.addWidget(view)
-    layout.addWidget(btn_exit)
-    layout.addWidget(btn_hint)
+    layout.addLayout(layout_buttons)
 
     window = QWidget()
     window.setLayout(layout)
