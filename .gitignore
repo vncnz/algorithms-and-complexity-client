@@ -136,3 +136,4 @@ Screenshot from *.png
 __pycache__/
 log.txt
 *.pyc
+log.txt
