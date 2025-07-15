@@ -11,9 +11,14 @@ from flip_solver import solve_lights_out, unflatten_grid, flatten_grid
 
 
 
-def get_from_env (key, default):
+def get_from_env (key, default, transformer=lambda x: x):
+    # return os.environ.get(key, default)
     if key in os.environ:
-        return os.environ[key]
+        v = os.environ[key]
+        try:
+            return transformer(v)
+        except:
+            pass
     return default
 
 def random_gen(m,n):
@@ -59,10 +64,9 @@ if __name__ == "__main__":
     print(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
     errfs_list = [flog, stderr]
 
-    m = int(get_from_env("TAL_m", "5"))
-    n = int(get_from_env("TAL_n", "5"))
-    seed_str = get_from_env("TAL_seed", "")
-    seed = int(seed_str) if seed_str else random.randint(100000,999999)
+    m = get_from_env("TAL_m", 5, int)
+    n = get_from_env("TAL_n", 5, int)
+    seed = get_from_env("TAL_seed", random.randint(100000,999999), int)
     random.seed(seed)
     #if "TAL_seed" in os.environ and os.environ["TAL_seed"] != "random":
     #    seed = int(os.environ["TAL_seed"] or "")
