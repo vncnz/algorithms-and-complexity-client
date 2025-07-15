@@ -7,6 +7,10 @@ from PyQt5.QtCore import QPointF, QTimer
 
 from functools import partial
 print_now = partial(print, flush=True)
+#def print_now_ (string):
+#    try: print(string, flush=True)
+#    except BrokenPipeError: sys.exit(32)
+#    except: sys.exit(1)
 
 def get_from_env (key, default):
     if key in os.environ:
