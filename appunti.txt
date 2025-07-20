@@ -1,12 +1,8 @@
-
-
-flip su rtal
-gioco monete da pdf da chat telegram calcoli xor e cazzi vari
-labirinto su corridoi o bordi
-
-sbattere la sottocartella su git e fare rtal coso come da screenshots
+1) Implementare il gioco flip su rtal
+2) Implementare gioco monete da pdf (Nim) su rtal
+3) Labirinto su corridoi o bordi
 
 CONFERMATI 12CFU
-Fine luglio come ipotesi mia
+Fine luglio come ipotesi mia se faccio in tempo
 Registrazione eventualmente a settembre
 Tirocinio OK
