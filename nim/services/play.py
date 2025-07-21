@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 from sys import stdin, stdout, stderr
 import os
-import random
+from time import sleep
+from functools import partial
 
-# from utilities import download_files
-from flip_solver import solve_lights_out, unflatten_grid, flatten_grid
-
-log = print
+log = print # Rewritten later in __main__
+send = partial(print, flush=True)
 
 
 
@@ -80,7 +79,6 @@ def apply_move (i, board):
 if __name__ == "__main__":
     flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "log.txt"), "w")
 
-    from functools import partial
     log = partial(print, file=flog, flush=True)
 
     log(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}")
@@ -91,9 +89,7 @@ if __name__ == "__main__":
     board = [(el, 0) for el in map(int, get_from_env("TAL_board", "3 3 3").split(' '))]
 
     log(board)
-    #from time import sleep
-    #sleep(1)
-    print(f'field:{board}')
+    send(f'field:{board}')
     num_moves = 0
     still_playing = True
     while still_playing:
@@ -101,7 +97,7 @@ if __name__ == "__main__":
         try:
             inp = input()
         except Exception as ex:
-            print(ex)
+            print(ex, file=stderr)
         log(f"input {inp}")
         cmd, _, i = inp.partition(':')
         if cmd == 'exit':
@@ -116,7 +112,13 @@ if __name__ == "__main__":
 
             new_board = apply_move(i, board)
             if new_board:
-                print(f'field:{new_board}')
+                send(f'field:{new_board}')
+            
+            # Example for "async" reply
+            # sleep(2)
+            # new_board = apply_move("2_1", board)
+            # if new_board:
+            #     send(f'field:{new_board}')
 
             #print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
             #print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
