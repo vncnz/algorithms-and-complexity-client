@@ -6,8 +6,7 @@ import random
 # from utilities import download_files
 from flip_solver import solve_lights_out, unflatten_grid, flatten_grid
 
-#from functools import partial
-#print_now = partial(print, flush=True)
+log = print
 
 
 
@@ -20,18 +19,6 @@ def get_from_env (key, default, transformer=lambda x: x):
         except:
             pass
     return default
-
-def random_gen(m,n):
-    field = [ [0 for __ in range(n)] for _ in range(m) ]
-    # for i in range(m):
-    #     for j in range(n):
-    #        field[i].append(random.randrange(2))
-    for _ in range(int(n * m / 2)):
-        i = random.randrange(n*m)
-        r = int(i / n)
-        c = i % n
-        apply_move(r, c, field)
-    return field
 
 def state_as_str(m,n, field, tab_cols=0,tab_rows=0):
     ans = "\n" * tab_rows
@@ -50,48 +37,69 @@ def solved(m,n, field, tab=0):
                 return False
     return True
 
-def apply_move (r, c, field):
-    for rr in {r-1,r,r+1}:
-        if 0 <= rr < m:
-            field[rr][c] = 1 - field[rr][c]
-    for cc in {c-1,c+1}:
-        if 0 <= cc < n:
-            field[r][cc] = 1 - field[r][cc]
+def apply_move (i, board):
+    half = int(len(board) / 2)
+    cursor = 0
+    for el in range(half):
+        next = cursor + board[el]
+        log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - cycle 1")
+        if next > i:
+            # We are on the right element
+            log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return board")
+            new_v = i - cursor
+            old_v = board[el]
+            board[el] = new_v
+            board[el + half] += (old_v - new_v)
+            log(f"board to be returned: {board}")
+            return board
+        else:
+            cursor = next
+            next = cursor + board[el + half]
+            log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - cycle 2")
+            if next > i:
+                log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return False")
+                return False
+    log(f"i:{i} cursor:{cursor} next:{next} board:{board} - end of function")
+        
 
 
 if __name__ == "__main__":
     flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "log.txt"), "w")
-    print(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
+
+    from functools import partial
+    log = partial(print, file=flog, flush=True)
+
+    log(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}")
     errfs_list = [flog, stderr]
 
-    board = map(int, get_from_env("TAL_board", "3 3 3").split(' '))
+    board = list(map(int, get_from_env("TAL_board", "3 3 3").split(' ')))
+    board += [0 for _ in board]
 
-    print(board, file=flog)
+    log(board)
     print(f'field:{board}')
     num_moves = 0
     still_playing = True
     while still_playing:
-        print("waiting input", file=flog)
+        log("waiting input")
         try:
             inp = input()
         except Exception as ex:
             print(ex)
-        print(f"input {inp}", file=flog)
+        log(f"input {inp}")
         cmd, _, i = inp.partition(':')
         if cmd == 'exit':
-            print("Received exit cmd", file=flog)
+            log("Received exit cmd")
             break
         if cmd == 'click':
-            print(f"Received click cmd with param {i}", file=flog)
+            log(f"Received click cmd with param {i}")
             i = int(i) # map(int, input().strip().split())
             if i == -1:
                 still_playing = False
                 continue
             # other special requests ...
 
-            #apply_move(r, c, field)
-
-            #print(f'field:{state_as_arr(m,n, field)}')
+            new_board = apply_move(i, board)
+            print(f'field:{new_board}')
 
             #print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
             #print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
@@ -99,7 +107,7 @@ if __name__ == "__main__":
             #    still_playing = False
             #    continue
         elif cmd == 'hint':
-            print(f'HINT CALLED field={board}', file=flog)
+            log(f'HINT CALLED field={board}')
             #solution = solve_lights_out(field)
             #if solution:
             #    print(f'hint:{flatten_grid(solution)}')

@@ -11,7 +11,14 @@ polygons = []
 colors = [QColor("#99cc99"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 scene = None
 
-board = map(int, get_from_env("TAL_board", "3 3 3").split(' '))
+## Vogliamo una rappresentazione del tipo presenti + tolte, ad esempio 3 0 3 0 3 0 se partiamo con 3 pile da 3 monete ciascuna
+#board = []
+#for el in map(int, get_from_env("TAL_board", "3 3 3").split(' ')):
+#    board.append(el)
+#    board.append(0)
+# Vogliamo una rappresentazione del tipo presenti + tolte, ad esempio 3 3 3 0 0 0 se partiamo con 3 pile da 3 monete ciascuna. E' più comodo così perché per qualunque scopo diverso dalla mera rappresentazione possiamo usare la prima metà della lista senza prendere in considerazione il resto (cioè le monete già rimosse)
+board = list(map(int, get_from_env("TAL_board", "3 3 3").split(' ')))
+board += [0 for _ in board]
 flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "ui_log.txt"), "w")
 
 def first_draw ():
@@ -33,10 +40,14 @@ def first_draw ():
         scene.addItem(poly)
         polygons.append(poly)
 
-#! To be changed
 def update_draw (data):
-    for idx,v in enumerate(data):
-        polygons[idx].update_color(colors[v])
+
+    for poly in polygons:
+        poly.update_color(colors[1])
+
+    half = len(data) / 2
+    for idx, v in enumerate(data[:half]):
+        polygons[idx].update_color(colors[0])
 
 #! To be changed
 def process_server_message(line):
