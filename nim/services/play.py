@@ -37,7 +37,7 @@ def solved(m,n, field, tab=0):
                 return False
     return True
 
-def apply_move (i, board):
+def apply_move_OLD (i, board):
     half = int(len(board) / 2)
     cursor = 0
     for el in range(half):
@@ -60,8 +60,22 @@ def apply_move (i, board):
                 log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return False")
                 return False
     log(f"i:{i} cursor:{cursor} next:{next} board:{board} - end of function")
-        
 
+def apply_move (i, board):
+    row,el = map(int, i.split('_'))
+    in_pile, removed = board[row]
+
+    if el >= in_pile:
+        log(f"i:{i} board:{board} - return False (invalid move)")
+        return False
+
+
+    log(f"i:{i} board:{board} - (pre-move)")
+    full_pile = in_pile + removed
+    new_couple = (el, full_pile - el)
+    board[row] = new_couple
+    log(f"i:{i} board:{board} - (post-move)")
+    return board
 
 if __name__ == "__main__":
     flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "log.txt"), "w")
@@ -72,10 +86,13 @@ if __name__ == "__main__":
     log(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}")
     errfs_list = [flog, stderr]
 
-    board = list(map(int, get_from_env("TAL_board", "3 3 3").split(' ')))
-    board += [0 for _ in board]
+    # board = list(map(int, get_from_env("TAL_board", "3 3 3").split(' ')))
+    # board += [0 for _ in board]
+    board = [(el, 0) for el in map(int, get_from_env("TAL_board", "3 3 3").split(' '))]
 
     log(board)
+    #from time import sleep
+    #sleep(1)
     print(f'field:{board}')
     num_moves = 0
     still_playing = True
@@ -92,14 +109,14 @@ if __name__ == "__main__":
             break
         if cmd == 'click':
             log(f"Received click cmd with param {i}")
-            i = int(i) # map(int, input().strip().split())
-            if i == -1:
+            if i == '-1':
                 still_playing = False
                 continue
             # other special requests ...
 
             new_board = apply_move(i, board)
-            print(f'field:{new_board}')
+            if new_board:
+                print(f'field:{new_board}')
 
             #print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
             #print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
