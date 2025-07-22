@@ -1,7 +1,8 @@
 import sys, os
 import json
 import select
-from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem
+
+from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
 from PyQt5.QtCore import QPointF, QTimer
 
@@ -40,3 +41,36 @@ def read_stdin_line(blocking):
         if select.select([sys.stdin], [], [], 0.0)[0]:
             return sys.stdin.readline()
     return None
+
+class GameUI:
+    def __init__(self):
+        app = QApplication(sys.argv)
+        scene = QGraphicsScene()
+        view = QGraphicsView(scene)
+        view.setFixedSize(400, 400)
+
+        # Layout
+        layout = QVBoxLayout()
+        layout_buttons = QHBoxLayout()
+        self.layout_buttons = layout_buttons
+
+        layout.addWidget(view)
+        layout.addLayout(layout_buttons)
+
+        window = QWidget()
+        window.setLayout(layout)
+        window.setWindowTitle("Nim")
+
+        self.window = window
+        self.app = app
+        self.scene = scene
+    
+    def add_buttons(self, buttons):
+        for btn in buttons:
+            self.layout_buttons.addWidget(btn)
+    
+    def show (self):
+        self.window.show()
+    
+    def run (self):
+        return self.app.exec_()

@@ -8,7 +8,6 @@ log = print # Rewritten later in __main__
 send = partial(print, flush=True)
 
 
-
 def get_from_env (key, default, transformer=lambda x: x):
     # return os.environ.get(key, default)
     if key in os.environ:
@@ -19,49 +18,74 @@ def get_from_env (key, default, transformer=lambda x: x):
             pass
     return default
 
-def state_as_str(m,n, field, tab_cols=0,tab_rows=0):
-    ans = "\n" * tab_rows
-    ans += f"{m} {n}"
-    for i in range(m):
-        ans += "\n" + " "*tab_cols + " ".join(map(str, field[i]))
-    return ans
-
-def state_as_arr (m, n, field):
-    return [el for row in field for el in row]
-
-def solved(m,n, field, tab=0):
-    for i in range(m):
-        for j in range(n):
-            if field[i][j] != 0:
-                return False
+def game_is_ended(board):
+    for in_pile, _ in board:
+        if in_pile > 0:
+            return False
     return True
 
-def apply_move_OLD (i, board):
-    half = int(len(board) / 2)
-    cursor = 0
-    for el in range(half):
-        next = cursor + board[el]
-        log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - cycle 1")
-        if next > i:
-            # We are on the right element
-            log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return board")
-            new_v = i - cursor
-            old_v = board[el]
-            board[el] = new_v
-            board[el + half] += (old_v - new_v)
-            log(f"board to be returned: {board}")
-            return board
-        else:
-            cursor = next
-            next = cursor + board[el + half]
-            log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - cycle 2")
-            if next > i:
-                log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return False")
-                return False
-    log(f"i:{i} cursor:{cursor} next:{next} board:{board} - end of function")
+# def apply_move_OLD (i, board):
+#     half = int(len(board) / 2)
+#     cursor = 0
+#     for el in range(half):
+#         next = cursor + board[el]
+#         log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - cycle 1")
+#         if next > i:
+#             # We are on the right element
+#             log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return board")
+#             new_v = i - cursor
+#             old_v = board[el]
+#             board[el] = new_v
+#             board[el + half] += (old_v - new_v)
+#             log(f"board to be returned: {board}")
+#             return board
+#         else:
+#             cursor = next
+#             next = cursor + board[el + half]
+#             log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - cycle 2")
+#             if next > i:
+#                 log(f"el:{el} i:{i} cursor:{cursor} next:{next} board:{board} - return False")
+#                 return False
+#     log(f"i:{i} cursor:{cursor} next:{next} board:{board} - end of function")
 
-def apply_move (i, board):
-    row,el = map(int, i.split('_'))
+# Exists two variants of the game:
+# - standard: winner-takes-last
+# - misère: loser-takes-last
+
+MISERE_MODE = False
+def compute_move (board):
+    game_sum = 0
+    for in_pile, _ in board:
+        game_sum = game_sum ^ in_pile
+    
+    if MISERE_MODE:
+        non_trivial = len(filter(lambda pile: pile[0] > 1, board))
+        if non_trivial <= 1:
+            ones = len(filter(lambda pile: pile[0] == 1, board))
+            if ones % 2 == 0:
+                # Leave odd number of 1s, opponent is forced to lose
+                for idx, (count, _) in enumerate(board):
+                    if count > 1:
+                        return idx, count
+            else:
+                # Leave even number of 1s
+                for idx, (count, _) in enumerate(board):
+                    if count == 1:
+                        return idx, 1
+    
+    if game_sum != 0: # find pile to reduce, we are in a good position
+        for row, (in_pile, _) in enumerate(board):
+            target = in_pile ^ game_sum
+            if target < in_pile:
+                # to_remove = in_pile - target
+                # return (row, to_remove)
+                return (row, target)
+    else: # reduce the longest pile, we are in a losing position
+        row = min(range(len(board)), lambda x: board[x])
+        # return (row, 1)
+        return (row, board[row][0] - 1)
+
+def apply_move (row, el, board):
     in_pile, removed = board[row]
 
     if el >= in_pile:
@@ -82,7 +106,6 @@ if __name__ == "__main__":
     log = partial(print, file=flog, flush=True)
 
     log(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}")
-    errfs_list = [flog, stderr]
 
     # board = list(map(int, get_from_env("TAL_board", "3 3 3").split(' ')))
     # board += [0 for _ in board]
@@ -92,6 +115,7 @@ if __name__ == "__main__":
     send(f'field:{board}')
     num_moves = 0
     still_playing = True
+    # player = 1
     while still_playing:
         log("waiting input")
         try:
@@ -110,15 +134,21 @@ if __name__ == "__main__":
                 continue
             # other special requests ...
 
-            new_board = apply_move(i, board)
+            row,el = map(int, i.split('_'))
+            new_board = apply_move(row, el, board)
             if new_board:
-                send(f'field:{new_board}')
+                board = new_board
+                send(f'field:{board}')
             
             # Example for "async" reply
-            # sleep(2)
+            sleep(2)
             # new_board = apply_move("2_1", board)
-            # if new_board:
-            #     send(f'field:{new_board}')
+            suggested_move = compute_move(board)
+            if suggested_move:
+                row,idx = suggested_move
+                new_board = apply_move(row, idx, board)
+                board = new_board
+                send(f'field:{board}')
 
             #print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
             #print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
