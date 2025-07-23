@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from sys import stdin, stdout, stderr
 import os
+import json
 from time import sleep
 from functools import partial
 
@@ -23,6 +24,19 @@ def game_is_ended(board):
         if in_pile > 0:
             return False
     return True
+
+class NimGameStatus:
+    def __init__(self, board, currentPlayer=1, status='running'):
+        self.board = board
+        self.currentPlayer = currentPlayer
+        self.status = status
+    
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=True,
+            indent=None)
 
 # def apply_move_OLD (i, board):
 #     half = int(len(board) / 2)
@@ -111,11 +125,12 @@ if __name__ == "__main__":
     # board += [0 for _ in board]
     board = [(el, 0) for el in map(int, get_from_env("TAL_board", "3 3 3").split(' '))]
 
+    game = NimGameStatus(board)
+
     log(board)
-    send(f'field:{board}')
-    num_moves = 0
+    send(f"game:{game.toJSON()}")
+    # send(f'board:{board}')
     still_playing = True
-    # player = 1
     while still_playing:
         log("waiting input")
         try:
@@ -126,38 +141,34 @@ if __name__ == "__main__":
         cmd, _, i = inp.partition(':')
         if cmd == 'exit':
             log("Received exit cmd")
+            sleep(.2) # Time to clean pipeline client-side without exceptions
             break
         if cmd == 'click':
             log(f"Received click cmd with param {i}")
             if i == '-1':
                 still_playing = False
                 continue
-            # other special requests ...
 
             row,el = map(int, i.split('_'))
             new_board = apply_move(row, el, board)
             if new_board:
                 board = new_board
-                send(f'field:{board}')
+                game.currentPlayer = 1 - game.currentPlayer
+                send(f"game:{game.toJSON()}")
             
             # Example for "async" reply
             sleep(2)
-            # new_board = apply_move("2_1", board)
             suggested_move = compute_move(board)
             if suggested_move:
                 row,idx = suggested_move
                 new_board = apply_move(row, idx, board)
                 board = new_board
-                send(f'field:{board}')
+                game.currentPlayer = 1 - game.currentPlayer
+                send(f"game:{game.toJSON()}")
 
-            #print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
-            #print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
-            #if solved(m,n, field):
-            #    still_playing = False
-            #    continue
         elif cmd == 'hint':
-            log(f'HINT CALLED field={board}')
-            #solution = solve_lights_out(field)
+            log(f'HINT CALLED board={board}')
+            #solution = solve_lights_out(board)
             #if solution:
             #    print(f'hint:{flatten_grid(solution)}')
             #else:

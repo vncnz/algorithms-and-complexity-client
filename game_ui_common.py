@@ -2,7 +2,7 @@ import sys, os
 import json
 import select
 
-from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLabel
 from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
 from PyQt5.QtCore import QPointF, QTimer
 
@@ -19,15 +19,16 @@ def get_from_env (key, default):
     return default
 
 class ClickablePolygon(QGraphicsPolygonItem):
-    def __init__(self, id, points, color):
+    def __init__(self, id, points, color, onclick):
         super().__init__(QPolygonF([QPointF(x, y) for x, y in points]))
         self.id = id
         self.setBrush(QBrush(color))
         self.setFlag(QGraphicsPolygonItem.ItemIsSelectable, True)
+        self.onclick = onclick
 
     def mousePressEvent(self, event):
         # print_now(json.dumps({"type": "click", "polygon": self.id}))
-        print_now(f'click:{self.id}')
+        self.onclick(self.id)
         super().mousePressEvent(event)
     
     def update_color (self, color):
@@ -47,6 +48,7 @@ class GameUI:
         app = QApplication(sys.argv)
         scene = QGraphicsScene()
         view = QGraphicsView(scene)
+        label = QLabel()
         view.setFixedSize(400, 400)
 
         # Layout
@@ -55,6 +57,7 @@ class GameUI:
         self.layout_buttons = layout_buttons
 
         layout.addWidget(view)
+        layout.addWidget(label)
         layout.addLayout(layout_buttons)
 
         window = QWidget()
@@ -64,10 +67,14 @@ class GameUI:
         self.window = window
         self.app = app
         self.scene = scene
+        self.label = label
     
-    def add_buttons(self, buttons):
+    def add_buttons (self, buttons):
         for btn in buttons:
             self.layout_buttons.addWidget(btn)
+    
+    def update_label (self, txt):
+        self.label.setText(txt)
     
     def show (self):
         self.window.show()

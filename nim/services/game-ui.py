@@ -11,19 +11,29 @@ from ast import literal_eval
 from time import sleep
 
 polygons = []
-colors = [QColor("#99cc99"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
+colors = [QColor("#99cc99"), QColor("#bbddbb"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 app = None
 
-board = [(el, 0) for el in map(int, get_from_env("TAL_board", "3 3 3").split(' '))]
 flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "ui_log.txt"), "w")
+currentPlayer = None
 
 def process_server_message(line):
+    global currentPlayer
     try:
         cmd, _, data = line.partition(':')
-        if cmd == 'field':
+        print_now(f'cmd:{cmd}   data:{data}', file=flog)
+        if cmd == 'board':
             msg = literal_eval(data)
             # print_now(f"Received: {msg}")
             app.draw(msg)
+        elif cmd == 'game':
+            game = json.loads(data)
+            currentPlayer = game["currentPlayer"]
+            app.draw(game["board"])
+            if currentPlayer == 1:
+                app.update_label(f"Playing: player")
+            else:
+                app.update_label(f"Playing: computer")
         #elif cmd == 'hint':
         #    msg = json.loads(data)
         #    # We get the full solution from the "server" but we show only the first cell to be pressed
@@ -38,14 +48,9 @@ class Nim(GameUI):
     def __init__(self):
 
         super().__init__()
-
-        def exit ():
-            print_now("exit:")
-            sleep(.1)
-            sys.exit(0)
         # UI buttons
         btn_exit = QPushButton("Exit")
-        btn_exit.clicked.connect(exit)
+        btn_exit.clicked.connect(self.exit)
 
         btn_hint = QPushButton("Hint")
         btn_hint.clicked.connect(lambda: print_now("hint:"))
@@ -69,14 +74,15 @@ class Nim(GameUI):
                 x = el * sz * 2
                 y = row * sz * 2
                 # print_now(f'{x},{y}', file=flog)
+                inpile_color = 0 if currentPlayer == 1 else 1
                 polygon_defs.append((
                     [(x-sz, y-sz), (x+sz, y-sz), (x+sz, y+sz), (x-sz, y+sz)],
-                    colors[0 if el < in_pile else 1],
+                    colors[inpile_color if el < in_pile else 2],
                     f"{row}_{el}"
                 ))
 
         for (points, color, id) in polygon_defs:
-            poly = ClickablePolygon(id, points, color)
+            poly = ClickablePolygon(id, points, color, onclick=self.onclick)
             self.scene.addItem(poly)
             polygons.append(poly)
 
@@ -85,9 +91,18 @@ class Nim(GameUI):
         for row, couple in enumerate(data):
             in_pile, removed = couple
             for el in range(in_pile + removed):
-                color = colors[0 if el < in_pile else 1]
+                inpile_color = 0 if currentPlayer == 1 else 1
+                color = colors[inpile_color if el < in_pile else 2]
                 poly = next(filter(lambda x: x.id == f'{row}_{el}', polygons))
                 poly.update_color(color)
+    
+    def onclick (self, id):
+        print_now(f'click:{id}')
+    
+    def exit (self):
+        print_now("exit:")
+        sleep(.1)
+        sys.exit(0)
 
 def main(blocking=True):
     global app
