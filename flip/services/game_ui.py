@@ -14,6 +14,9 @@ scene = None
 m = int(get_from_env("TAL_m", "5"))
 n = int(get_from_env("TAL_n" ,"5"))
 
+def onclick (id):
+    print_now(f'click:{id}')
+
 def first_draw ():
     polygon_defs = []
     for idx in range(m * n):
@@ -26,7 +29,7 @@ def first_draw ():
         ))
 
     for i, (points, color) in enumerate(polygon_defs):
-        poly = ClickablePolygon(i, points, color)
+        poly = ClickablePolygon(i, points, color, onclick=onclick)
         scene.addItem(poly)
         polygons.append(poly)
 

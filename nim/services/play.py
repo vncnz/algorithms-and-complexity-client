@@ -99,6 +99,9 @@ def compute_move (board):
         # return (row, 1)
         return (row, board[row][0] - 1)
 
+def check_game_end (board):
+    return not any(in_pile > 0 for in_pile, _ in board)
+
 def apply_move (row, el, board):
     in_pile, removed = board[row]
 
@@ -132,6 +135,7 @@ if __name__ == "__main__":
     # send(f'board:{board}')
     still_playing = True
     while still_playing:
+        inp = None
         log("waiting input")
         try:
             inp = input()

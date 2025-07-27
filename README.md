@@ -18,11 +18,11 @@ Matricola VR457811 - Progetto d'esame AA 2024/2025
 
 Se si può utilizzare rtald il comando dovrebbe assomigliare a questo:
 
-```./rtal connect flip -am=2 -an=2 -- game-ui.py```
+```rtal connect nim -aboard="4 2 3" -- nim/services/game_ui.py```
 
 In assenza di rtald, è possibile avviare utilizzando il file orchestrator.py:
 
-```python orchestrator.py```
+```python orchestrator.py nim```
 
 Questo script si occupa di eseguire parallelamente game-ui.py e flip/play.py agganciando in maniera incrociata i rispettivi stdin ed stdout, simulando così il funzionamento di rtald.
 

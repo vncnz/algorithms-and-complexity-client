@@ -1,0 +1,38 @@
+TALight evaluation manager service called for problem:
+   
+Seed for this call to the service: 37545.
+m=3, n=3
+
+3 3
+   0 0 0
+   1 0 1
+   1 0 1
+waiting input
+input click:6
+Received click cmd with param 6
+
+
+
+
+Move 1: 2 0
+
+3 3
+   0 0 0
+   0 0 1
+   0 1 1
+waiting input
+input hint:
+HINT CALLED m=3 n=3 field=[[0, 0, 0], [0, 0, 1], [0, 1, 1]]
+waiting input
+input click:8
+Received click cmd with param 8
+
+
+
+
+Move 2: 2 2
+
+3 3
+   0 0 0
+   0 0 0
+   0 0 0

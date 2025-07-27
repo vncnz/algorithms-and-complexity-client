@@ -4,17 +4,10 @@ services:
     solve:
         evaluator: [python, services/play.py]
         args:
-            m:
-                regex: ^[1-9]$
-                default: 4
-                explain: number of rows 
-            n:
-                regex: ^[1-9]$
-                default: 4
-                explain: number of colums
-            seed:
-                regex: ^(random|[1-9][0-9]{5,5})$
-                default: random
+            board:
+                regex: ^[1-9 ]+$
+                default: "4 3 4"
+                explain: array with each piles's height
 
     synopsis:
         evaluator: [python, services/synopsis/synopsis_driver.py]

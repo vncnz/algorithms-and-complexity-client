@@ -3,7 +3,12 @@ import threading
 import sys, os
 from time import sleep
 
+# print(sys.argv)
+# sys.exit(0)
 game = 'nim'
+
+if len(sys.argv) > 1:
+    game = sys.argv[1]
 
 child_env = os.environ.copy()
 
@@ -25,7 +30,7 @@ def pipe(src, dst, tag=""):
 
 # Avvia i due processi
 gui = subprocess.Popen(
-    [sys.executable, game + "/services/game-ui.py"],
+    [sys.executable, game + "/services/game_ui.py"],
     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
     env=child_env,
     text=True, bufsize=1
