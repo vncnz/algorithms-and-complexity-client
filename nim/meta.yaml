@@ -9,17 +9,17 @@ services:
                 default: "4 3 4"
                 explain: array with each piles's height
 
-    synopsis:
-        evaluator: [python, services/synopsis/synopsis_driver.py]
-        args:
-            service:
-                regex: ^((\S)+)$
-                default: synopsis
-                explain: any string without space characters but meant to specify one of the services of the problem %(problem)s
-            lang:
-                regex: ^(hardcoded|hardcoded_ext|en|it)$
-                default: it
-            metafile:
-                regex: ^(main|en|it)$
-                default: main
+    #synopsis:
+    #    evaluator: [python, services/synopsis/synopsis_driver.py]
+    #    args:
+    #        service:
+    #            regex: ^((\S)+)$
+    #            default: synopsis
+    #            explain: any string without space characters but meant to specify one of the services of the problem %(problem)s
+    #        lang:
+    #            regex: ^(hardcoded|hardcoded_ext|en|it)$
+    #            default: it
+    #        metafile:
+    #            regex: ^(main|en|it)$
+    #            default: main
 ...
