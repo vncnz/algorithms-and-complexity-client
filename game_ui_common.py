@@ -44,7 +44,7 @@ def read_stdin_line(blocking):
     return None
 
 class GameUI:
-    def __init__(self):
+    def __init__(self, gamename):
         app = QApplication(sys.argv)
         scene = QGraphicsScene()
         view = QGraphicsView(scene)
@@ -62,7 +62,7 @@ class GameUI:
 
         window = QWidget()
         window.setLayout(layout)
-        window.setWindowTitle("Nim")
+        window.setWindowTitle(gamename)
 
         self.window = window
         self.app = app
