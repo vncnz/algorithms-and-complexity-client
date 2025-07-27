@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from sys import stdin, stdout, stderr
 import os
+import json
 import random
 
 # from utilities import download_files
@@ -8,8 +9,10 @@ from flip_solver import solve_lights_out, unflatten_grid, flatten_grid
 
 #from functools import partial
 #print_now = partial(print, flush=True)
+from functools import partial
 
-
+log = print # Rewritten later in __main__
+send = partial(print, flush=True)
 
 def get_from_env (key, default, transformer=lambda x: x):
     # return os.environ.get(key, default)
@@ -22,46 +25,61 @@ def get_from_env (key, default, transformer=lambda x: x):
     return default
 
 def random_gen(m,n):
-    field = [ [0 for __ in range(n)] for _ in range(m) ]
+    board = [ [0 for __ in range(n)] for _ in range(m) ]
     # for i in range(m):
     #     for j in range(n):
-    #        field[i].append(random.randrange(2))
+    #        board[i].append(random.randrange(2))
     for _ in range(int(n * m / 2)):
         i = random.randrange(n*m)
         r = int(i / n)
         c = i % n
-        apply_move(r, c, field)
-    return field
+        apply_move(r, c, board)
+    return board
 
-def state_as_str(m,n, field, tab_cols=0,tab_rows=0):
+def state_as_str(m,n, board, tab_cols=0,tab_rows=0):
     ans = "\n" * tab_rows
     ans += f"{m} {n}"
     for i in range(m):
-        ans += "\n" + " "*tab_cols + " ".join(map(str, field[i]))
+        ans += "\n" + " "*tab_cols + " ".join(map(str, board[i]))
     return ans
 
-def state_as_arr (m, n, field):
-    return [el for row in field for el in row]
+def state_as_arr (m, n, board):
+    return [el for row in board for el in row]
 
-def solved(m,n, field, tab=0):
+def solved(m,n, board, tab=0):
     for i in range(m):
         for j in range(n):
-            if field[i][j] != 0:
+            if board[i][j] != 0:
                 return False
     return True
 
-def apply_move (r, c, field):
+def apply_move (r, c, board):
     for rr in {r-1,r,r+1}:
         if 0 <= rr < m:
-            field[rr][c] = 1 - field[rr][c]
+            board[rr][c] = 1 - board[rr][c]
     for cc in {c-1,c+1}:
         if 0 <= cc < n:
-            field[r][cc] = 1 - field[r][cc]
+            board[r][cc] = 1 - board[r][cc]
 
+class FlipGameStatus:
+    def __init__(self, board, row, currentPlayer=1, status='running'):
+        self.board = board
+        self.row = row
+        self.currentPlayer = currentPlayer
+        self.status = status
+
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=True,
+            indent=None)
 
 if __name__ == "__main__":
     flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "log.txt"), "w")
-    print(f"TALight evaluation manager service called for problem:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
+    log = partial(print, file=flog, flush=True)
+
+    print(f"TALight evaluation manager service called for problem FLIP:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
     errfs_list = [flog, stderr]
 
     m = get_from_env("TAL_m", 5, int)
@@ -71,9 +89,13 @@ if __name__ == "__main__":
     #if "TAL_seed" in os.environ and os.environ["TAL_seed"] != "random":
     #    seed = int(os.environ["TAL_seed"] or "")
     print(f"Seed for this call to the service: {seed}.\n{m=}, {n=}", file=flog)
-    field = random_gen(m,n)
-    print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
-    print(f'field:{state_as_arr(m,n, field)}')
+
+    board = random_gen(m,n)
+
+    game = FlipGameStatus(board, n)
+    send(f"game:{game.toJSON()}")
+
+    log(state_as_str(m,n, board, tab_cols=3, tab_rows=1))
     num_moves = 0
     still_playing = True
     while still_playing:
@@ -89,29 +111,31 @@ if __name__ == "__main__":
             break
         if cmd == 'click':
             print(f"Received click cmd with param {i}", file=flog)
-            i = int(i) # map(int, input().strip().split())
-            r = int(i / n)
-            c = i % n
+            # i = int(i) # map(int, input().strip().split())
+            # r = int(i / n)
+            # c = i % n
             if i == -1:
                 still_playing = False
                 continue
             # other special requests ...
+
+            row,col = map(int, i.split('_'))
             
             num_moves += 1
-            apply_move(r, c, field)
+            apply_move(row, col, game.board)
             
-            print(f'field:{state_as_arr(m,n, field)}')
+            send(f"game:{game.toJSON()}")
 
-            print(f"\n\n\n\nMove {num_moves}: {r} {c}", file=flog)
-            print(state_as_str(m,n, field, tab_cols=3, tab_rows=1), file=flog)
-            if solved(m,n, field):
+            print(f"\n\n\n\nMove {num_moves}: {row} {col}", file=flog)
+            print(state_as_str(m,n, board, tab_cols=3, tab_rows=1), file=flog)
+            if solved(m,n, game.board):
                 still_playing = False
                 continue
         elif cmd == 'hint':
-            print(f'HINT CALLED m={m} n={n} field={field}', file=flog)
-            # unflatten = unflatten_grid(field, n, m)
+            print(f'HINT CALLED m={m} n={n} board={board}', file=flog)
+            # unflatten = unflatten_grid(board, n, m)
             # print(f'unflatten:{unflatten} m={m} n={n}', file=flog)
-            solution = solve_lights_out(field)
+            solution = solve_lights_out(game.board)
             if solution:
                 print(f'hint:{flatten_grid(solution)}')
             else:
