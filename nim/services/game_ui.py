@@ -12,7 +12,7 @@ from game_ui_common import print_now, ClickablePolygon, read_stdin_line, get_fro
 from ast import literal_eval
 from time import sleep
 
-polygons = []
+# polygons = []
 colors = [QColor("#99cc99"), QColor("#bbddbb"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 app = None
 
@@ -49,7 +49,7 @@ def process_server_message(line):
 class Nim(GameUI):
     def __init__(self):
 
-        super().__init__()
+        super().__init__('Nim')
         # UI buttons
         btn_exit = QPushButton("Exit")
         btn_exit.clicked.connect(self.exit)
@@ -59,9 +59,11 @@ class Nim(GameUI):
 
         self.add_buttons([btn_exit, btn_hint])
 
+        self.polygons = []
+
     def draw (self, data):
         # (update_draw if len(polygons) > 0 else first_draw)(data)
-        if len(polygons) > 0:
+        if len(self.polygons) > 0:
             self.update_draw(data)
         else:
             self.first_draw(data)
@@ -86,7 +88,7 @@ class Nim(GameUI):
         for (points, color, id) in polygon_defs:
             poly = ClickablePolygon(id, points, color, onclick=self.onclick)
             self.scene.addItem(poly)
-            polygons.append(poly)
+            self.polygons.append(poly)
 
     def update_draw (self, data):
 
@@ -95,7 +97,7 @@ class Nim(GameUI):
             for el in range(in_pile + removed):
                 inpile_color = 0 if currentPlayer == 1 else 1
                 color = colors[inpile_color if el < in_pile else 2]
-                poly = next(filter(lambda x: x.id == f'{row}_{el}', polygons))
+                poly = next(filter(lambda x: x.id == f'{row}_{el}', self.polygons))
                 poly.update_color(color)
     
     def onclick (self, id):
