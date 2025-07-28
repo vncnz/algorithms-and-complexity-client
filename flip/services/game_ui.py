@@ -7,7 +7,11 @@ from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphi
 from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
 from PyQt5.QtCore import QPointF, QTimer
 
-from game_ui_common import print_now, ClickablePolygon, read_stdin_line, get_from_env, GameUI
+from game_ui_common import ClickablePolygon, read_stdin_line, get_from_env, GameUI
+
+from functools import partial
+log = print # Rewritten later in __main__
+send = partial(print, flush=True)
 
 from time import sleep
 
@@ -15,9 +19,8 @@ from time import sleep
 colors = [QColor("#666666"), QColor("#ff7799")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 app = None
 
-flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "ui_log.txt"), "w")
-print_now(f'GAME: flip', file=flog)
 currentPlayer = None
+gameStatus = None
 
 m = int(get_from_env("TAL_m", "5"))
 n = int(get_from_env("TAL_n" ,"5"))
@@ -25,26 +28,32 @@ n = int(get_from_env("TAL_n" ,"5"))
 def process_server_message(line):
     try:
         cmd, _, data = line.partition(':')
-        print_now(f'cmd:{cmd}   data:{data}', file=flog)
+        log(f'cmd:{cmd}   data:{data}')
         #if cmd == 'field':
         #    msg = json.loads(data)
-        #    # print_now(f"Received: {msg}")
+        #    # send(f"Received: {msg}")
         #    app.draw(msg)
         if cmd == 'game':
             game = json.loads(data)
             currentPlayer = game["currentPlayer"]
+            gameStatus = game["status"]
             app.draw(game["board"], game["row"])
-            if currentPlayer == 1:
+            if currentPlayer == 1: # unused in flip game
                 app.update_label(f"Playing: player")
-            else:
+            elif currentPlayer == 0: # unused in flip game
                 app.update_label(f"Playing: computer")
+            elif gameStatus == 'win':
+                app.end_game(True)
+            elif gameStatus == 'running':
+                app.update_label(f"Keep trying...")
         elif cmd == 'hint':
             msg = json.loads(data)
             # We get the full solution from the "server" but we show only the first cell to be pressed
             first_hint = msg.index(1)
-            app.polygons[first_hint].update_color(QColor('#ffdd44')) #! Change me!
+            app.draw_hint(first_hint)
+            app.update_label(f"Click on the yellow square!")
     # except json.JSONDecodeError:
-    #     print_now("Invalid JSON")
+    #     send("Invalid JSON")
     except Exception as e:
         print(e)
 
@@ -57,11 +66,12 @@ class Flip(GameUI):
         btn_exit.clicked.connect(self.exit)
 
         btn_hint = QPushButton("Hint")
-        btn_hint.clicked.connect(lambda: print_now("hint:"))
+        btn_hint.clicked.connect(lambda: send("hint:"))
 
         self.add_buttons([btn_exit, btn_hint])
 
         self.polygons = []
+        self.readonly = False
 
     def draw (self, data, row):
         # (update_draw if len(polygons) > 0 else first_draw)(data)
@@ -94,13 +104,23 @@ class Flip(GameUI):
                 c = colors[board[row][column]]
                 poly = next(filter(lambda x: x.id == f'{row}_{column}', self.polygons))
                 poly.update_color(c)
+    
+    def draw_hint (self, idx):
+        self.polygons[idx].update_color(QColor('#ffdd44'))
 
     def onclick (self, id):
-        print_now(f'Clicked {id}', file=flog)
-        print_now(f'click:{id}')
+        if not self.readonly:
+            log(f'Clicked {id}')
+            send(f'click:{id}')
+    
+    def end_game (self, win):
+        if win: self.update_label(f"Congratulations!")
+        # No lose case in flip game
+        self.readonly = True
     
     def exit (self):
-        print_now("exit:")
+        log("Exiting")
+        send("exit:")
         sleep(.1)
         sys.exit(0)
 
@@ -137,4 +157,7 @@ def main(blocking=True):
     sys.exit(app.run())
 
 if __name__ == "__main__":
+    flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "ui_log.txt"), "w")
+    log = partial(print, file=flog, flush=True)
+    log(f'GAME: flip')
     main(blocking=False)

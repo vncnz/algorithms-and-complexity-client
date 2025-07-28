@@ -62,7 +62,7 @@ def apply_move (r, c, board):
             board[r][cc] = 1 - board[r][cc]
 
 class FlipGameStatus:
-    def __init__(self, board, row, currentPlayer=1, status='running'):
+    def __init__(self, board, row, currentPlayer=None, status='running'):
         self.board = board
         self.row = row
         self.currentPlayer = currentPlayer
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "log.txt"), "w")
     log = partial(print, file=flog, flush=True)
 
-    print(f"TALight evaluation manager service called for problem FLIP:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}", file=flog)
+    log(f"TALight evaluation manager service called for problem FLIP:\n   {os.path.split(get_from_env('TAL_META_DIR', ""))[-1]}")
     errfs_list = [flog, stderr]
 
     m = get_from_env("TAL_m", 5, int)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     random.seed(seed)
     #if "TAL_seed" in os.environ and os.environ["TAL_seed"] != "random":
     #    seed = int(os.environ["TAL_seed"] or "")
-    print(f"Seed for this call to the service: {seed}.\n{m=}, {n=}", file=flog)
+    log(f"Seed for this call to the service: {seed}.\n{m=}, {n=}")
 
     board = random_gen(m,n)
 
@@ -99,46 +99,48 @@ if __name__ == "__main__":
     num_moves = 0
     still_playing = True
     while still_playing:
-        print("waiting input", file=flog)
+        log("waiting input")
         try:
             inp = input()
         except Exception as ex:
             print(ex)
-        print(f"input {inp}", file=flog)
+        log(f"input {inp}")
         cmd, _, i = inp.partition(':')
         if cmd == 'exit':
-            print("Received exit cmd", file=flog)
+            log("Received exit cmd")
             break
         if cmd == 'click':
-            print(f"Received click cmd with param {i}", file=flog)
+            log(f"Received click cmd with param {i}")
             # i = int(i) # map(int, input().strip().split())
             # r = int(i / n)
             # c = i % n
-            if i == -1:
-                still_playing = False
-                continue
+            # if i == -1:
+            #     still_playing = False
+            #     continue
             # other special requests ...
 
             row,col = map(int, i.split('_'))
             
             num_moves += 1
             apply_move(row, col, game.board)
+
+            log(f"\n\n\n\nMove {num_moves}: {row} {col}")
+            log(state_as_str(m,n, board, tab_cols=3, tab_rows=1))
+            if solved(m,n, game.board):
+                # still_playing = False
+                # continue
+                game.status = 'win'
             
             send(f"game:{game.toJSON()}")
 
-            print(f"\n\n\n\nMove {num_moves}: {row} {col}", file=flog)
-            print(state_as_str(m,n, board, tab_cols=3, tab_rows=1), file=flog)
-            if solved(m,n, game.board):
-                still_playing = False
-                continue
         elif cmd == 'hint':
-            print(f'HINT CALLED m={m} n={n} board={board}', file=flog)
+            log(f'HINT CALLED m={m} n={n} board={board}')
             # unflatten = unflatten_grid(board, n, m)
-            # print(f'unflatten:{unflatten} m={m} n={n}', file=flog)
+            # log(f'unflatten:{unflatten} m={m} n={n}')
             solution = solve_lights_out(game.board)
             if solution:
-                print(f'hint:{flatten_grid(solution)}')
+                send(f'hint:{flatten_grid(solution)}')
             else:
-                print(f'hint:')
+                send(f'hint:')
     flog.close()
     
