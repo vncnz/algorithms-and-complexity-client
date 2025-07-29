@@ -93,7 +93,7 @@ def gauss_mod2(A, b):
                 break
     return x
 
-def solve_lights_out(grid):
+def solve_lights_out(grid: list[list[int]]) -> list[list[int]]:
     n, m = len(grid), len(grid[0])
     A = build_flip_matrix(n, m)
     # print(A)
@@ -104,39 +104,22 @@ def solve_lights_out(grid):
         return None
     return unflatten_grid(x, n, m)
 
-
-
-
-def print_field (m, n, lst):
-    print('Field:')
-    for idx, el in enumerate(lst):
-        print(f' {el} ', end='')
-        if idx % n == n - 1:
-            print()
-
-def apply_move (m, n, lst, i):
-    i = int(i)
-    r = int(i / n)
-    c = i % n
-
-    if r > 0: lst[i-n] = 1 - lst[i-n]
-    if r < m - 1: lst[i+n] = 1 - lst[i+n]
-    if c > 0: lst[i-1] = 1 - lst[i-1]
-    if c < m - 1: lst[i+1] = 1 - lst[i+1]
-
-    lst[i] = 1 - lst[i]
-    
-    return lst
+#def apply_move (m, n, lst, i):
+#    i = int(i)
+#    r = int(i / n)
+#    c = i % n
+#    if r > 0: lst[i-n] = 1 - lst[i-n]
+#    if r < m - 1: lst[i+n] = 1 - lst[i+n]
+#    if c > 0: lst[i-1] = 1 - lst[i-1]
+#    if c < m - 1: lst[i+1] = 1 - lst[i+1]
+#    lst[i] = 1 - lst[i]    
+#    return lst
 
 
 #n = 3 # numero colonne
 #m = 3 # numero righe
 #field = [0 for _ in range(n*m)]
 #field[3] = 1
-
-#print_field(m, n, field)
-# field = apply_move(m, n, field.copy(), 8)
-#print_field(m, n, field)
 
 if __name__ == '__main__':
 
@@ -151,4 +134,3 @@ if __name__ == '__main__':
         print("Lights to be clicked:")
         for row in solution:
             print(row)
-        # print_field(len(grid), len(grid[0]), solution)

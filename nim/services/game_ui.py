@@ -2,33 +2,34 @@
 
 import sys, os
 import json
-import select
-from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
-from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
-from PyQt5.QtCore import QPointF, QTimer
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QTimer
 
-from game_ui_common import print_now, ClickablePolygon, read_stdin_line, get_from_env, GameUI
+from game_ui_common import ClickablePolygon, read_stdin_line, get_from_env, GameUI
 
-from ast import literal_eval
+from functools import partial
+log = print # Rewritten later in __main__
+send = partial(print, flush=True)
+
 from time import sleep
 
 # polygons = []
 colors = [QColor("#99cc99"), QColor("#bbddbb"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 app = None
 
-flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "ui_log.txt"), "w")
 currentPlayer = None
 
 def process_server_message(line):
     global currentPlayer
     try:
         cmd, _, data = line.partition(':')
-        print_now(f'cmd:{cmd}   data:{data}', file=flog)
-        if cmd == 'board':
-            msg = literal_eval(data)
-            # print_now(f"Received: {msg}")
-            app.draw(msg)
-        elif cmd == 'game':
+        log(f'cmd:{cmd}   data:{data}')
+        # if cmd == 'board':
+        #    from ast import literal_eval
+        #    msg = literal_eval(data)
+        #    app.draw(msg)
+        if cmd == 'game':
             game = json.loads(data)
             currentPlayer = game["currentPlayer"]
             app.draw(game["board"])
@@ -42,7 +43,7 @@ def process_server_message(line):
         #    first_hint = msg.index(1)
         #    polygons[first_hint].update_color(QColor('#ffdd44'))
     # except json.JSONDecodeError:
-    #     print_now("Invalid JSON")
+    #     log("Invalid JSON")
     except Exception as e:
         print(e)
 
@@ -54,10 +55,10 @@ class Nim(GameUI):
         btn_exit = QPushButton("Exit")
         btn_exit.clicked.connect(self.exit)
 
-        btn_hint = QPushButton("Hint")
-        btn_hint.clicked.connect(lambda: print_now("hint:"))
+        # btn_hint = QPushButton("Hint")
+        # btn_hint.clicked.connect(lambda: send("hint:"))
 
-        self.add_buttons([btn_exit, btn_hint])
+        self.add_buttons([btn_exit])
 
         self.polygons = []
 
@@ -73,11 +74,10 @@ class Nim(GameUI):
         for row, couple in enumerate(data):
             sz = 30
             in_pile, removed = couple
-            # print_now(f'couple:{couple}', file=flog)
+            # log(f'couple:{couple}')
             for el in range(in_pile + removed):
                 x = el * sz * 2
                 y = row * sz * 2
-                # print_now(f'{x},{y}', file=flog)
                 inpile_color = 0 if currentPlayer == 1 else 1
                 polygon_defs.append((
                     [(x-sz, y-sz), (x+sz, y-sz), (x+sz, y+sz), (x-sz, y+sz)],
@@ -101,10 +101,12 @@ class Nim(GameUI):
                 poly.update_color(color)
     
     def onclick (self, id):
-        print_now(f'click:{id}')
+        log(f'Clicked {id}')
+        send(f'click:{id}')
     
     def exit (self):
-        print_now("exit:")
+        log("Exiting")
+        send("exit:")
         sleep(.1)
         sys.exit(0)
 
@@ -123,4 +125,7 @@ def main(blocking=True):
     sys.exit(app.run())
 
 if __name__ == "__main__":
+    flog = open(os.path.join(get_from_env("TAL_META_OUTPUT_FILES", ""), "ui_log.txt"), "w")
+    log = partial(print, file=flog, flush=True)
+    log(f'GAME: nim')
     main(blocking=False)

@@ -2,10 +2,9 @@
 
 import sys, os
 import json
-import select
-from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
-from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
-from PyQt5.QtCore import QPointF, QTimer
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QTimer
 
 from game_ui_common import ClickablePolygon, read_stdin_line, get_from_env, GameUI
 
@@ -15,8 +14,7 @@ send = partial(print, flush=True)
 
 from time import sleep
 
-# polygons = []
-colors = [QColor("#666666"), QColor("#ff7799")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
+colors = [QColor("#666666"), QColor("#ff7799")]
 app = None
 
 currentPlayer = None
@@ -125,24 +123,6 @@ class Flip(GameUI):
         sys.exit(0)
 
 def main(blocking=True):
-
-    #back_coo = (-150, -150)
-    #back_points = [
-    #    (back_coo[0]-50, back_coo[1]-10),
-    #    (back_coo[0]+50, back_coo[1]-10),
-    #    (back_coo[0]+50, back_coo[1]+10),
-    #    (back_coo[0]-50, back_coo[1]+10)
-    #]
-    #back = ClickablePolygon(-1, back_points, QColor("#ff8855"), text="Exit")
-    #scene.addItem(back)
-
-    #polygons = [
-        #[(50, 50), (150, 60), (120, 150), (60, 140)],
-        #[(200, 80), (300, 100), (280, 180), (210, 160)],
-        #[(100, 200), (180, 220), (160, 300), (90, 280)],
-        #[(250, 250), (320, 270), (310, 340), (260, 320)]
-    #]
-
     global app
     app = Flip()
     app.show()

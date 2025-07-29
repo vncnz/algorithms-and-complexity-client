@@ -40,11 +40,11 @@ def state_as_str(m,n, board, tab_cols=0,tab_rows=0):
     ans = "\n" * tab_rows
     ans += f"{m} {n}"
     for i in range(m):
-        ans += "\n" + " "*tab_cols + " ".join(map(str, board[i]))
+        ans += "\n" + " " * tab_cols + " ".join(map(str, board[i]))
     return ans
 
-def state_as_arr (m, n, board):
-    return [el for row in board for el in row]
+# def state_as_arr (m, n, board):
+#     return [el for row in board for el in row]
 
 def solved(m,n, board, tab=0):
     for i in range(m):
