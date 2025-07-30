@@ -59,7 +59,7 @@ def unflatten_grid(vec, n, m):
     ''' Convert from list-style to matrix-style '''
     return [vec[i*m:(i+1)*m] for i in range(n)]
 
-def gauss_mod2(A, b):
+def gauss_mod2(A, b, log):
     N = len(b)
     M = [A[i][:] + [b[i]] for i in range(N)] # Ab matrix
 
@@ -82,7 +82,7 @@ def gauss_mod2(A, b):
     # Verifica inconsistenza
     for r in range(N):
         if all(M[r][c] == 0 for c in range(N)) and M[r][N] == 1:
-            return None  # sistema incompatibile
+            return None  # sistema senza soluzione
 
     # Soluzione particolare (non necessariamente unica)
     x = [0] * N
@@ -91,14 +91,20 @@ def gauss_mod2(A, b):
             if M[i][j] == 1:
                 x[j] = M[i][N]
                 break
+    
+    
+    log("Autosolver")
+    log('N', N)
+    log('M', M)
+    log('Computed solution', x)
     return x
 
-def solve_lights_out(grid: list[list[int]]) -> list[list[int]]:
+def solve_lights_out(grid: list[list[int]], log: callable) -> list[list[int]]:
     n, m = len(grid), len(grid[0])
     A = build_flip_matrix(n, m)
     # print(A)
     b = flatten_grid(grid)
-    x = gauss_mod2(A, b)
+    x = gauss_mod2(A, b, log)
     if x is None:
         # print("Nessuna soluzione trovata.")
         return None
@@ -112,7 +118,7 @@ def solve_lights_out(grid: list[list[int]]) -> list[list[int]]:
 #    if r < m - 1: lst[i+n] = 1 - lst[i+n]
 #    if c > 0: lst[i-1] = 1 - lst[i-1]
 #    if c < m - 1: lst[i+1] = 1 - lst[i+1]
-#    lst[i] = 1 - lst[i]    
+#    lst[i] = 1 - lst[i]
 #    return lst
 
 

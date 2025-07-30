@@ -89,3 +89,4 @@ Completando l'esempio, affiancando la matrice A con il vettore b otteniamo
 
 #### Risoluzione
 
+Applicando il [metodo di gauss](https://it.wikipedia.org/wiki/Metodo_di_eliminazione_di_Gauss) riduciamo la matrice in una forma a gradini e poi, tramite _back subsitution_, troviamo le celle che devono essere cliccate.

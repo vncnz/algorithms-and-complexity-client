@@ -36,12 +36,8 @@ def random_gen(m,n):
         apply_move(r, c, board)
     return board
 
-def state_as_str(m,n, board, tab_cols=0,tab_rows=0):
-    ans = "\n" * tab_rows
-    ans += f"{m} {n}"
-    for i in range(m):
-        ans += "\n" + " " * tab_cols + " ".join(map(str, board[i]))
-    return ans
+def state_as_str(board):
+    return "\n".join(map(lambda row: " ".join(map(str, row)), board))
 
 # def state_as_arr (m, n, board):
 #     return [el for row in board for el in row]
@@ -95,7 +91,7 @@ if __name__ == "__main__":
     game = FlipGameStatus(board, n)
     send(f"game:{game.toJSON()}")
 
-    log(state_as_str(m,n, board, tab_cols=3, tab_rows=1))
+    log(state_as_str(board))
     num_moves = 0
     still_playing = True
     while still_playing:
@@ -125,7 +121,7 @@ if __name__ == "__main__":
             apply_move(row, col, game.board)
 
             log(f"\n\n\n\nMove {num_moves}: {row} {col}")
-            log(state_as_str(m,n, board, tab_cols=3, tab_rows=1))
+            log(state_as_str(board))
             if solved(m,n, game.board):
                 # still_playing = False
                 # continue
@@ -137,7 +133,7 @@ if __name__ == "__main__":
             log(f'HINT CALLED m={m} n={n} board={board}')
             # unflatten = unflatten_grid(board, n, m)
             # log(f'unflatten:{unflatten} m={m} n={n}')
-            solution = solve_lights_out(game.board)
+            solution = solve_lights_out(game.board, log)
             if solution:
                 send(f'hint:{flatten_grid(solution)}')
             else:
