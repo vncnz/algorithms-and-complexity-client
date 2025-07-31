@@ -13,7 +13,8 @@ services:
                 default: 4
                 explain: number of colums
             seed:
-                regex: ^(random|[1-9][0-9]{5,5})$
+                # regex: ^(random|[1-9][0-9]{5,5})$
+                regex: ^[0-9]+$
                 default: random
 
     #synopsis:
