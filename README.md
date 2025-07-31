@@ -19,7 +19,7 @@ Matricola VR457811 - Progetto d'esame AA 2024/2025
 Se si può utilizzare rtald il comando dovrebbe assomigliare a questo:
 
 ```rtal connect nim -aboard="4 2 3" -- nim/services/game_ui.py```
-```rtal connect flip -an=2 -am=3 -- flip/services/game_ui.py```
+```rtal connect flip -an=2 -am=3 -aseed=34 -- flip/services/game_ui.py```
 
 In assenza di rtald, è possibile avviare utilizzando il file orchestrator.py:
 
@@ -28,6 +28,18 @@ In assenza di rtald, è possibile avviare utilizzando il file orchestrator.py:
 Questo script si occupa di eseguire parallelamente game-ui.py e flip/play.py agganciando in maniera incrociata i rispettivi stdin ed stdout, simulando così il funzionamento di rtald.
 
 ## Flip
+
+Questo gioco viene avviato col seguente comando:
+
+```rtal connect flip -an=2 -am=3 -aseed=465 -- flip/services/game_ui.py```
+
+I parametri che è possibile passare sono le dimensioni della griglia di gioco, chiamati `n` ed `m`, ed un `seed` che viene usato per la generazione dello stato iniziale della partita. Nessuno di questi parametri è obbligatorio: per `n` ed `m` è previsto un default pari a 5, come `seed` viene invece usato un valore casuale.
+
+L'interfaccia di gioco prevede la griglia di elementi cliccabili e due tasti funzione: il tasto **Exit** per la chiusura "pulita" dell'applicazione sia lato server che lato client ed il tasto **Hint** che mostra un suggerimento evidenziando in giallo una delle celle da cliccare secondo una soluzione trovata.
+
+Un altro elemento presente a video è un testo informativo che indica quando il gioco è concluso.
+
+![flip game](./screenshots/flip.png)
 
 ### Solver / richiesta suggerimento
 
@@ -89,4 +101,23 @@ Completando l'esempio, affiancando la matrice A con il vettore b otteniamo
 
 #### Risoluzione
 
-Applicando il [metodo di gauss](https://it.wikipedia.org/wiki/Metodo_di_eliminazione_di_Gauss) riduciamo la matrice in una forma a gradini e poi, tramite _back subsitution_, troviamo le celle che devono essere cliccate.
+Applicando il [metodo di gauss](https://it.wikipedia.org/wiki/Metodo_di_eliminazione_di_Gauss) riduciamo la matrice in una forma a gradini e poi, tramite _back subsitution_, troviamo i valori che costituiscono il vettore x, cioé troviamo quali celle devono essere cliccate per raggiungere una soluzione.
+
+## Nim
+
+Questo gioco viene avviato col seguente comando:
+
+```rtal connect nim -aboard="4 2 3" -- nim/services/game_ui.py```
+
+L'unico parametro accettato è `board`, consistente in una stringa che contiene numeri interi. Ogni numero è l'altezza della pila di monete.
+
+Graficamente, il gioco viene visualizzato come serie di righe in cui ogni riga ha un numero di celle pari al numero di monete corrispondente. L'interfaccia comprende anche un tasto **Exit** per la chiusura "pulita" dell'applicazione sia lato server che lato client che un testo che informa su chi abbia il turno.
+
+Le celle di un verde acceso indicano le monete ancora presenti nella pila a cui appartengono e sono elementi cliccabili, le celle grigie indicano le monete già rimosse e non sono più cliccabili. Quando il turno è del computer le celle verdi sono colorate con un colore meno acceso e non rispondono al click. L'evento di click scatena la rimozione della moneta cliccata e di tutte le eventuali monete ancora presenti a destra di essa.
+
+![nim game inizio](./screenshots/nim_inizio.png)
+![nim game pc turn](./screenshots/nim_pc_turn.png)
+![nim game player turn](./screenshots/nim_player_turn.png)
+
+### Intelligenza del giocatore-computer
+
