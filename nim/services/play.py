@@ -161,15 +161,20 @@ if __name__ == "__main__":
                 game.currentPlayer = 1 - game.currentPlayer
                 send(f"game:{game.toJSON()}")
             
-            # Example for "async" reply
-            sleep(2)
-            suggested_move = compute_move(board)
-            if suggested_move:
-                row,idx = suggested_move
-                new_board = apply_move(row, idx, board)
-                board = new_board
-                game.currentPlayer = 1 - game.currentPlayer
-                send(f"game:{game.toJSON()}")
+            if check_game_end(board):
+                game.status = 'Player lose' if MISERE_MODE else 'Player won'
+            else:
+                sleep(2)
+                suggested_move = compute_move(board)
+                if suggested_move:
+                    row,idx = suggested_move
+                    new_board = apply_move(row, idx, board)
+                    board = new_board
+                    if check_game_end(board):
+                        game.status = 'Player won' if MISERE_MODE else 'Player lose'
+                    else:
+                        game.currentPlayer = 1 - game.currentPlayer
+            send(f"game:{game.toJSON()}")
 
         elif cmd == 'hint':
             log(f'HINT CALLED board={board}')

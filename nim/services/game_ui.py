@@ -33,10 +33,14 @@ def process_server_message(line):
             game = json.loads(data)
             currentPlayer = game["currentPlayer"]
             app.draw(game["board"])
-            if currentPlayer == 1:
-                app.update_label(f"Playing: player")
+            if game['status'] != 'running':
+                app.update_label(game['status'])
+                currentPlayer = None
             else:
-                app.update_label(f"Playing: computer")
+                if currentPlayer == 1:
+                    app.update_label(f"Playing: player")
+                else:
+                    app.update_label(f"Playing: computer")
         #elif cmd == 'hint':
         #    msg = json.loads(data)
         #    # We get the full solution from the "server" but we show only the first cell to be pressed
