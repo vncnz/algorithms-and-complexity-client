@@ -68,6 +68,7 @@ class NimGameStatus:
 
 MISERE_MODE = False
 def compute_move (board):
+    # game_sum = reduce(operator.xor, board)
     game_sum = 0
     for in_pile, _ in board:
         game_sum = game_sum ^ in_pile
