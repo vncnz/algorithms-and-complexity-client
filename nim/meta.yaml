@@ -6,7 +6,7 @@ services:
         args:
             board:
                 regex: ^[1-9 ]+$
-                default: "4 3 4"
+                default: "3 4 5"
                 explain: array with each piles's height
 
     #synopsis:
