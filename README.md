@@ -2,7 +2,12 @@
 Matricola VR457811 - Progetto d'esame AA 2024/2025
 
 ## Obiettivo
-[TODO]
+Creare alcuni giochi costituiti da una parte client ed una parte server. La parte server deve essere eseguita nel sistema rtal.
+
+I giochi da implementare sono i seguenti:
+- [x] Flip
+- [x] Nim
+- [ ] Labirinto percorribile su corridoi o bordi
 
 ## Istruzioni per l'esecuzione
 
@@ -25,7 +30,11 @@ In assenza di rtald, è possibile avviare utilizzando il file orchestrator.py:
 
 ```python orchestrator.py nim```
 
-Questo script si occupa di eseguire parallelamente game-ui.py e flip/play.py agganciando in maniera incrociata i rispettivi stdin ed stdout, simulando così il funzionamento di rtald.
+Questo script si occupa di eseguire parallelamente game-ui.py e [game]/play.py agganciando in maniera incrociata i rispettivi stdin ed stdout, simulando così il funzionamento di rtald. Questo sistema è stato usato nelle prime fasi di sviluppo, potrebbe essere necessaria qualche correttiva per farlo funzionare ancora.
+
+# Librerie
+
+E' stata utilizzata un'unica libreria per la parte grafica, chiamata PyQt.
 
 ## Flip
 
@@ -121,3 +130,11 @@ Le celle di un verde acceso indicano le monete ancora presenti nella pila a cui 
 
 ### Intelligenza del giocatore-computer
 
+L'idea alla base di questo metodo consiste nel calcolare lo XOR bit a bit tra i numeri delle monete presenti in ciascuna pila: `num = pila1 ^ pila2 ^ ...`.
+Se `num` è pari a 0 il giocatore a cui tocca in quel momento è in una posizione di svantaggio, in caso contrario il giocatore corrente è in una posizione di vantaggio. Il motivo è che l'operazione di XOR agisce come una sorta di bilanciamento delle rappresentazioni in binario dei numeri: se il risultato è 0 il gioco è bilanciato, se è diverso da zero il giocatore può effettuare una mossa per bilanciare il gioco.
+
+Più in dettaglio, bisogna capire quante monete rimuovere e da quale pila. Consideriamo il bit più significativo di `nim_num`: se in posizione `n` abbiamo un bit a 1, significa che almeno una (o tre, o cinque, eccetera) pile hanno quel bit impostato a 1. Rimuovendo un numero di monete dato dal numero binario che ha come unico bit a 1 quello in posizione `n`, abbiamo rimosso lo sbilanciamento dei bit lasciando all'altro giocatore una situazione in cui il `nim_num` è pari a 0.
+Se `nim_num` è pari a 0, però, non c'è alcun bit più significativo su cui ragionare. In questo caso rimuoveremo da una pila tutte le monete eccetto una.
+
+#### Misère mode
+Esiste una variante chiamata `misère`, in cui chi prende l'ultima moneta perde anziché vincere. Il calcolo della mossa, in questa modalità, rimane identico finché la situazione non vede la presenza di massimo una pila con più di una moneta. In questo caso specifico, si conta il numero di pile con una moneta sola: se questo numero è multiplo di due, si rimuovono tutte le monete dall'eventuale riga con più di una moneta, in caso contrario si rimuove l'unica moneta da una delle pile con una moneta sola.
