@@ -13,10 +13,13 @@ I giochi da implementare sono i seguenti:
 
 ### venv
 
+E' necessario aver installato la libreria PyQt. Se lo si desidera si può utilizzare venv per non dover installare la libreria a livello globale sulla propria macchina.
+
 | what to do      | cmd            |
 |-----------------|----------------|
 |Creazione venv:  | python -m venv |
 |Activate: source | ./bin/activate |
+|Installazione PyQt | python3 -m pip install requests |
 
 
 ### Exec
