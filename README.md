@@ -19,7 +19,7 @@ E' necessario aver installato la libreria PyQt. Se lo si desidera si può utiliz
 |-----------------|----------------|
 |Creazione venv:  | python -m venv |
 |Activate: source | ./bin/activate |
-|Installazione PyQt | python3 -m pip install requests |
+|Installazione PyQt | python3 -m pip install PyQt5 |
 
 
 ### Exec
