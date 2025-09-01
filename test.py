@@ -1,152 +1,88 @@
-'''
-L'idea è che possiamo definire i seguenti elementi:
-A è la matrice delle mosse
-b è un vettore rappresentante lo stato attuale del gioco
-x è un vettore rappresentante le celle da cliccare per risolvere il gioco
-Si vuole risolvere il sistema A·x = b mod 2
+import random
 
-La dimensione della matrice A è di NxN con N=n*m
-La dimensione di b è un vettore lungo n*m
-La dimensione di x è un vettore lungo n*m
+def prim_maze(rows, cols):
+    # ogni cella avrà info sui muri: N, S, E, W
+    maze = [{'N': True, 'S': True, 'E': True, 'W': True} for _ in range(rows * cols)]
 
-Com'è la matrice A? Vediamo un esempio, con una griglia 2x2 con soli 0:
-0 0
-0 0
-La rappresentazione lineare è 0,0,0,0.
-Se premiamo la cella in alto a sinistra, diventa
-1 1
-1 0
-La rappresentazione lineare è 1,1,1,0.
+    def neighbors(index):
+        r, c = divmod(index, cols)
+        result = []
+        if r > 0: result.append(('N', index - cols))   # sopra
+        if r < rows - 1: result.append(('S', index + cols))  # sotto
+        if c > 0: result.append(('W', index - 1))      # sinistra
+        if c < cols - 1: result.append(('E', index + 1))  # destra
+        return result
 
-Ogni riga della matrice A contiene degli 1 nelle celle che cambiano valore alla pressione della cella corrispondente a tale riga, rimanendo sull'esempio per una griglia 2x2:
-1, 1, 1, 0    -> le celle che cambiano premendo quella in posizione 0
-1, 1, 0, 1    -> le celle che cambiano premendo quella in posizione 1
-1, 0, 1, 1    -> le celle che cambiano premendo quella in posizione 2
-0, 1, 1, 1    -> le celle che cambiano premendo quella in posizione 3
+    # iniziamo da una cella casuale
+    start = random.randrange(rows * cols)
+    visited = {start}
+    walls = []
 
-Se la situazione iniziale del gioco è
-1 0
-0 0
-Abbiamo che il vettore b è 1,0,0,0. Affiancando la matrice A di prima con questo vettore b otteniamo
-1, 1, 1, 0, 1
-1, 1, 0, 1, 0
-1, 0, 1, 1, 0
-0, 1, 1, 1, 0
+    # aggiungiamo i muri iniziali
+    for direction, n in neighbors(start):
+        walls.append((start, n, direction))
 
-'''
+    # mapping direzione opposta
+    opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
 
-def build_flip_matrix(n, m):
-    size = n * m
-    A = [[0 for _ in range(size)] for _ in range(size)]
+    while walls:
+        # scegli un muro a caso
+        cell, next_cell, direction = random.choice(walls)
+        walls.remove((cell, next_cell, direction))
 
-    def idx(i, j):
-        return i * m + j
+        if next_cell not in visited:
+            # rimuoviamo il muro tra cella e next_cell
+            maze[cell][direction] = False
+            maze[next_cell][opposite[direction]] = False
 
-    for i in range(n):
-        for j in range(m):
-            index = idx(i, j)
-            A[index][index] = 1  # se premi questa casella, si inverte
-            for ni, nj in [(i-1,j), (i+1,j), (i,j-1), (i,j+1)]:
-                if 0 <= ni < n and 0 <= nj < m:
-                    A[idx(ni, nj)][index] = 1
-    return A
+            visited.add(next_cell)
+            # aggiungi i nuovi muri candidati
+            for d, n in neighbors(next_cell):
+                if n not in visited:
+                    walls.append((next_cell, n, d))
 
-def flatten_grid(grid):
-    ''' Convert from matrix-style to list-style '''
-    return [cell for row in grid for cell in row]
+    return maze
 
-def unflatten_grid(vec, n, m):
-    ''' Convert from list-style to matrix-style '''
-    return [vec[i*m:(i+1)*m] for i in range(n)]
+PRINT_IDX = True
+def draw_maze_ascii(width, height, maze):
+    """
+    Disegna il labirinto in ASCII.
+    - width, height: dimensioni
+    - maze: dict {cell_index: set(direzioni_aperte)} 
+      dove direzioni_aperte è un set con 'N','S','E','W'
+    """
+    output = ""
 
-def gauss_mod2(A, b):
-    N = len(b)
-    M = [A[i][:] + [b[i]] for i in range(N)] # Ab matrix
+    # prima riga (tetto)
+    output += "+" + "---+" * width + "\n"
 
-    row = 0
-    for col in range(N):
-        pivot = None
-        for r in range(row, N):
-            if M[r][col] == 1:
-                pivot = r
-                break
-        if pivot is None:
-            continue
-        if pivot != row:
-            M[row], M[pivot] = M[pivot], M[row]
-        for r in range(N):
-            if r != row and M[r][col] == 1:
-                M[r] = [(x ^ y) for x, y in zip(M[r], M[row])]
-        row += 1
+    for y in range(height):
+        # Riga con muri verticali
+        row = "|"
+        for x in range(width):
+            idx = y * width + x
+            p = idx if PRINT_IDX else ''
+            if maze[idx]['E'] or ((idx+1) % width == 0):
+                row += f" {p:2}|"  # nessun muro a destra
+            else:
+                row += f" {p:2} "
+        output += row + "\n"
 
-    # Verifica inconsistenza
-    for r in range(N):
-        if all(M[r][c] == 0 for c in range(N)) and M[r][N] == 1:
-            return None  # sistema incompatibile
+        # Riga con muri orizzontali
+        row = "+"
+        for x in range(width):
+            idx = y * width + x
+            if maze[idx]['S']:
+                row += "---+"  # nessun muro sotto
+            else:
+                row += "   +"
+        output += row + "\n"
 
-    # Soluzione particolare (non necessariamente unica)
-    x = [0] * N
-    for i in range(N):
-        for j in range(N):
-            if M[i][j] == 1:
-                x[j] = M[i][N]
-                break
-    return x
-
-def solve_lights_out(grid):
-    n, m = len(grid), len(grid[0])
-    A = build_flip_matrix(n, m)
-    print(A)
-    b = flatten_grid(grid)
-    x = gauss_mod2(A, b)
-    if x is None:
-        print("Nessuna soluzione trovata.")
-        return None
-    return unflatten_grid(x, n, m)
+    return output
 
 
-
-
-def print_field (m, n, lst):
-    print('Field:')
-    for idx, el in enumerate(lst):
-        print(f' {el} ', end='')
-        if idx % n == n - 1:
-            print()
-
-def apply_move (m, n, lst, i):
-    i = int(i)
-    r = int(i / n)
-    c = i % n
-
-    if r > 0: lst[i-n] = 1 - lst[i-n]
-    if r < m - 1: lst[i+n] = 1 - lst[i+n]
-    if c > 0: lst[i-1] = 1 - lst[i-1]
-    if c < m - 1: lst[i+1] = 1 - lst[i+1]
-
-    lst[i] = 1 - lst[i]
-    
-    return lst
-
-
-#n = 3 # numero colonne
-#m = 3 # numero righe
-#field = [0 for _ in range(n*m)]
-#field[3] = 1
-
-#print_field(m, n, field)
-# field = apply_move(m, n, field.copy(), 8)
-#print_field(m, n, field)
-
-grid = [
-    [1, 1, 1],
-    [0, 1, 0],
-    [0, 1, 0]
-]
-
-solution = solve_lights_out(grid)
-if solution:
-    print("Lights to be clicked:")
-    for row in solution:
-        print(row)
-    # print_field(len(grid), len(grid[0]), solution)
+w,h = 14,4
+maze = prim_maze(w,h)
+for idx, cell in enumerate(maze):
+    print(idx, cell)
+print(draw_maze_ascii(w,h, maze))
