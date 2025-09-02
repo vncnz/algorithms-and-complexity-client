@@ -1,7 +1,9 @@
 import random
 
-PRINT_IDX = False
+PRINT_IDX = True
 rows, cols = 5,10
+entry_cell = 1
+exit_cell = 8
 
 def prim_maze(rows, cols):
     # ogni cella avrà info sui muri: N, S, E, W
@@ -29,12 +31,16 @@ def prim_maze(rows, cols):
     # mapping direzione opposta
     opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
 
+    tree = {}
+
     while walls:
         # scegli un muro a caso
         cell, next_cell, direction = random.choice(walls)
         walls.remove((cell, next_cell, direction))
 
         if next_cell not in visited:
+            tree[next_cell] = cell
+
             # rimuoviamo il muro tra cella e next_cell
             maze[cell][direction] = False
             maze[next_cell][opposite[direction]] = False
@@ -44,8 +50,9 @@ def prim_maze(rows, cols):
             for d, n in neighbors(next_cell):
                 if n not in visited:
                     walls.append((next_cell, n, d))
+    # print(tree)
 
-    return maze
+    return maze, tree
 
 def draw_maze_ascii(rows, cols, maze):
     """
@@ -83,7 +90,34 @@ def draw_maze_ascii(rows, cols, maze):
 
     return output
 
-maze = prim_maze(rows, cols)
+def build_path (start, end, tree):
+    s_path = [start]
+    while True:
+        if s_path[-1] in tree and s_path[-1] != tree[s_path[-1]]:
+            s_path.append(tree[s_path[-1]])
+        else:
+            break
+    e_path = [end]
+    while True:
+        if e_path[-1] in tree and e_path[-1] != tree[e_path[-1]]:
+            e_path.append(tree[e_path[-1]])
+        else:
+            break
+
+    idx = -1
+    while idx > -len(s_path) and idx > -len(e_path):
+        if s_path[idx-1] == e_path[idx-1]:
+            idx -= 1
+        else:
+            break
+    print(idx)
+    return s_path, e_path, s_path[0:idx] + [s_path[idx]] + list(reversed(e_path[0:idx]))
+
+maze, tree = prim_maze(rows, cols)
+print(tree)
 for idx, cell in enumerate(maze):
     print(idx, cell)
 print(draw_maze_ascii(rows, cols, maze))
+
+solution = build_path(entry_cell, exit_cell, tree)
+print(solution)
