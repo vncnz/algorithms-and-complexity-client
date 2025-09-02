@@ -1,5 +1,8 @@
 import random
 
+PRINT_IDX = False
+rows, cols = 5,10
+
 def prim_maze(rows, cols):
     # ogni cella avrà info sui muri: N, S, E, W
     maze = [{'N': True, 'S': True, 'E': True, 'W': True} for _ in range(rows * cols)]
@@ -11,6 +14,7 @@ def prim_maze(rows, cols):
         if r < rows - 1: result.append(('S', index + cols))  # sotto
         if c > 0: result.append(('W', index - 1))      # sinistra
         if c < cols - 1: result.append(('E', index + 1))  # destra
+        print(f'neighbors of {index}: {result}')
         return result
 
     # iniziamo da una cella casuale
@@ -43,26 +47,25 @@ def prim_maze(rows, cols):
 
     return maze
 
-PRINT_IDX = True
-def draw_maze_ascii(width, height, maze):
+def draw_maze_ascii(rows, cols, maze):
     """
     Disegna il labirinto in ASCII.
-    - width, height: dimensioni
+    - rows, cols: dimensioni
     - maze: dict {cell_index: set(direzioni_aperte)} 
       dove direzioni_aperte è un set con 'N','S','E','W'
     """
     output = ""
 
     # prima riga (tetto)
-    output += "+" + "---+" * width + "\n"
+    output += "+" + "---+" * cols + "\n"
 
-    for y in range(height):
+    for y in range(rows):
         # Riga con muri verticali
         row = "|"
-        for x in range(width):
-            idx = y * width + x
+        for x in range(cols):
+            idx = y * cols + x
             p = idx if PRINT_IDX else ''
-            if maze[idx]['E'] or ((idx+1) % width == 0):
+            if maze[idx]['E'] or ((idx+1) % cols == 0):
                 row += f" {p:2}|"  # nessun muro a destra
             else:
                 row += f" {p:2} "
@@ -70,8 +73,8 @@ def draw_maze_ascii(width, height, maze):
 
         # Riga con muri orizzontali
         row = "+"
-        for x in range(width):
-            idx = y * width + x
+        for x in range(cols):
+            idx = y * cols + x
             if maze[idx]['S']:
                 row += "---+"  # nessun muro sotto
             else:
@@ -80,9 +83,7 @@ def draw_maze_ascii(width, height, maze):
 
     return output
 
-
-w,h = 14,4
-maze = prim_maze(w,h)
+maze = prim_maze(rows, cols)
 for idx, cell in enumerate(maze):
     print(idx, cell)
-print(draw_maze_ascii(w,h, maze))
+print(draw_maze_ascii(rows, cols, maze))
