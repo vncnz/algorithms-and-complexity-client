@@ -119,5 +119,7 @@ for idx, cell in enumerate(maze):
     print(idx, cell)
 print(draw_maze_ascii(rows, cols, maze))
 
-solution = build_path(entry_cell, exit_cell, tree)
-print(solution)
+s_path, e_path, solution = build_path(entry_cell, exit_cell, tree)
+print('Path from start to root', s_path)
+print('Path from end to root  ', e_path)
+print('Path between nodes     ', solution)
