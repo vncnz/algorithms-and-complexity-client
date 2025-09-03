@@ -1,0 +1,33 @@
+---
+public_folder: public
+services:
+    solve:
+        evaluator: [python, services/play.py]
+        args:
+            r:
+                regex: ^[1-9]$
+                default: 5
+                explain: number of rows 
+            c:
+                regex: ^[1-9]$
+                default: 10
+                explain: number of colums
+            seed:
+                # regex: ^(random|[1-9][0-9]{5,5})$
+                regex: ^[0-9]+$
+                default: random
+
+    #synopsis:
+    #    evaluator: [python, services/synopsis/synopsis_driver.py]
+    #    args:
+    #        service:
+    #            regex: ^((\S)+)$
+    #            default: synopsis
+    #            explain: any string without space characters but meant to specify one of the services of the problem %(problem)s
+    #        lang:
+    #            regex: ^(hardcoded|hardcoded_ext|en|it)$
+    #            default: it
+    #        metafile:
+    #            regex: ^(main|en|it)$
+    #            default: main
+...
