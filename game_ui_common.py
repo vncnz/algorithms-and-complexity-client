@@ -49,7 +49,9 @@ class GameUI:
         scene = QGraphicsScene()
         view = QGraphicsView(scene)
         label = QLabel()
-        view.setFixedSize(400, 400)
+        self.drawWidth = 400
+        self.drawHeight = 400
+        view.setFixedSize(self.drawWidth, self.drawHeight)
 
         # Layout
         layout = QVBoxLayout()

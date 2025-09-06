@@ -7,6 +7,7 @@ import random
 #from functools import partial
 #print_now = partial(print, flush=True)
 from functools import partial
+from maze_logic import prim_maze
 
 log = print # Rewritten later in __main__
 send = partial(print, flush=True)
@@ -20,18 +21,6 @@ def get_from_env (key, default, transformer=lambda x: x):
         except:
             pass
     return default
-
-def random_gen(m,n):
-    board = [ [0 for __ in range(n)] for _ in range(m) ]
-    # for i in range(m):
-    #     for j in range(n):
-    #        board[i].append(random.randrange(2))
-    for _ in range(int(n * m / 2)):
-        i = random.randrange(n*m)
-        r = int(i / n)
-        c = i % n
-        apply_move(r, c, board)
-    return board
 
 def state_as_str(board):
     return "\n".join(map(lambda row: " ".join(map(str, row)), board))
@@ -55,10 +44,9 @@ def apply_move (r, c, board):
             board[r][cc] = 1 - board[r][cc]
 
 class MazeGameStatus:
-    def __init__(self, board, row, currentPlayer=None, status='running'):
+    def __init__(self, board, row, status='running'):
         self.board = board
         self.row = row
-        self.currentPlayer = currentPlayer
         self.status = status
 
     def toJSON(self):
@@ -83,7 +71,7 @@ if __name__ == "__main__":
     #    seed = int(os.environ["TAL_seed"] or "")
     log(f"Seed for this call to the service: {seed}.\n{m=}, {n=}")
 
-    board = random_gen(m,n)
+    board, tree = prim_maze(m, n)
 
     game = MazeGameStatus(board, n)
     send(f"game:{game.toJSON()}")

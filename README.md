@@ -28,6 +28,7 @@ Se si può utilizzare rtald il comando dovrebbe assomigliare a questo:
 
 ```rtal connect nim -aboard="4 2 3" -- nim/services/game_ui.py```
 ```rtal connect flip -an=2 -am=3 -aseed=34 -- flip/services/game_ui.py```
+```rtal connect maze -an=2 -am=3 -aseed=34 -- maze/services/game_ui.py```
 
 In assenza di rtald, è possibile avviare utilizzando il file orchestrator.py:
 

@@ -18,29 +18,16 @@ from time import sleep
 colors = [QColor("#99cc99"), QColor("#bbddbb"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
 app = None
 
-currentPlayer = None
-
 def process_server_message(line):
-    global currentPlayer
     try:
         cmd, _, data = line.partition(':')
         log(f'cmd:{cmd}   data:{data}')
-        # if cmd == 'board':
-        #    from ast import literal_eval
-        #    msg = literal_eval(data)
-        #    app.draw(msg)
         if cmd == 'game':
             game = json.loads(data)
-            currentPlayer = game["currentPlayer"]
-            app.draw(game["board"])
+            log("proceeding with drawing game board")
+            app.draw(game["board"], game["row"])
             if game['status'] != 'running':
                 app.update_label(game['status'])
-                currentPlayer = None
-            else:
-                if currentPlayer == 1:
-                    app.update_label(f"Playing: player")
-                else:
-                    app.update_label(f"Playing: computer")
         #elif cmd == 'hint':
         #    msg = json.loads(data)
         #    # We get the full solution from the "server" but we show only the first cell to be pressed
@@ -67,25 +54,57 @@ class Maze(GameUI):
         self.polygons = []
 
     def draw (self, data, ncols):
+        log(f"Drawing game board")
         # (update_draw if len(polygons) > 0 else first_draw)(data)
         if len(self.polygons) > 0:
             self.update_draw(data, ncols)
         else:
             self.first_draw(data, ncols)
+    
+    def draw_maze_cell (self, row, column, sz, cell, polygon_defs):
+        cell_half_size = 2
+
+        x = column * sz * 2
+        y = row * sz * 2
+        polygon_defs.append((
+            [(x-sz, y-sz), (x+sz, y-sz), (x+sz, y+sz), (x-sz, y+sz)],
+            QColor("#bbddbb") if (row % 2 - column % 2) else QColor("#b0ddbb"),
+            f"{row}_{column}"
+        ))
+        if cell['N']:
+            polygon_defs.append((
+                [(x-sz, y-sz-cell_half_size), (x+sz, y-sz-cell_half_size), (x+sz, y-sz+cell_half_size), (x-sz, y-sz+cell_half_size)],
+                QColor("#333333"),
+                f"{row}_{column}_N"
+            ))
+        if cell['E']:
+            polygon_defs.append((
+                [(x+sz-cell_half_size, y-sz), (x+sz+cell_half_size, y-sz), (x+sz+cell_half_size, y+sz), (x+sz-cell_half_size, y+sz)],
+                QColor("#333333"),
+                f"{row}_{column}_E"
+            ))
+        if cell['S']:
+            polygon_defs.append((
+                [(x-sz, y+sz-cell_half_size), (x+sz, y+sz-cell_half_size), (x+sz, y+sz+cell_half_size), (x-sz, y+sz+cell_half_size)],
+                QColor("#333333"),
+                f"{row}_{column}_S"
+            ))
+        if cell['W']:
+            polygon_defs.append((
+                [(x-sz-cell_half_size, y-sz), (x-sz+cell_half_size, y-sz), (x-sz+cell_half_size, y+sz), (x-sz-cell_half_size, y+sz)],
+                QColor("#333333"),
+                f"{row}_{column}_W"
+            ))
 
     def first_draw (self, board, ncols):
-        sz = 30
+        sz = min(30, int((self.drawWidth - 4)/ ncols / 2))
+        log(f'sz:{sz} drawWidth:{self.drawWidth} ncols:{ncols}')
         polygon_defs = []
         for idx, cell in enumerate(board):
             row = int(idx / ncols)
             column = idx % ncols
-            x = column * sz * 2
-            y = row * sz * 2
-            polygon_defs.append((
-                [(x-sz, y-sz), (x+sz, y-sz), (x+sz, y+sz), (x-sz, y+sz)],
-                QColor("#bbddbb") if idx % 2 else QColor("#99ddbb"),
-                f"{row}_{column}"
-            ))
+            log(f'drawing {idx} at {column},{row}')
+            self.draw_maze_cell(row, column, sz, cell, polygon_defs)
 
         for (points, color, id) in polygon_defs:
             poly = ClickablePolygon(id, points, color, onclick=self.onclick)
