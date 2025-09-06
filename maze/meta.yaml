@@ -5,11 +5,11 @@ services:
         evaluator: [python, services/play.py]
         args:
             r:
-                regex: ^[1-9]$
+                regex: ^[1-9][0-9]*$
                 default: 5
                 explain: number of rows 
             c:
-                regex: ^[1-9]$
+                regex: ^[1-9][0-9]*$
                 default: 10
                 explain: number of colums
             seed:
