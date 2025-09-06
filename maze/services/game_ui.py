@@ -4,7 +4,7 @@ import sys, os
 import json
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtGui import QColor
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 
 from game_ui_common import ClickablePolygon, read_stdin_line, get_from_env, GameUI
 
@@ -42,6 +42,19 @@ def process_server_message(line):
     except Exception as e:
         print(e)
 
+
+def process_key (event):
+    key = event.key()
+    log(f"pressed {key}")
+    if key == Qt.Key_Up:
+        send('move:N')
+    elif key == Qt.Key_Down:
+        send('move:S')
+    elif key == Qt.Key_Left:
+        send('move:O')
+    elif key == Qt.Key_Right:
+        send('move:E')
+
 class Maze(GameUI):
     def __init__(self):
 
@@ -50,10 +63,13 @@ class Maze(GameUI):
         btn_exit = QPushButton("Exit")
         btn_exit.clicked.connect(self.exit)
 
-        # btn_hint = QPushButton("Hint")
-        # btn_hint.clicked.connect(lambda: send("hint:"))
+        btn_hint = QPushButton("Hint")
+        btn_hint.clicked.connect(lambda: send("hint:"))
 
-        self.add_buttons([btn_exit])
+        self.add_buttons([btn_hint, btn_exit])
+
+        self.setOnKeyEvent(process_key)
+        self.setOnClose(lambda: self.exit)
 
         self.polygons = []
 
@@ -133,7 +149,7 @@ class Maze(GameUI):
                 try:
                     poly = next(filter(lambda x: x.id == f'{idx}', self.polygons))
                     poly.update_color(c)
-                    log(f'Color updated for obj with id {idx}')
+                    # log(f'Color updated for obj with id {idx}')
                 except Exception as ex:
                     log(f'Exception updating color for obj with id {idx}: {ex}')
             else:
