@@ -107,7 +107,7 @@ class Maze(GameUI):
     def first_draw (self, data):
         board = data["board"]
         ncols = data["row"]
-        sz = min(30, int((self.drawWidth - 4)/ ncols / 2))
+        sz = min(30, int((self.drawWidth - 4)/ ncols / 2), int((self.drawHeight - 4)/ (len(board)/ncols) / 2))
         log(f'sz:{sz} drawWidth:{self.drawWidth} ncols:{ncols}')
         polygon_defs = []
         for idx, cell in enumerate(board):
