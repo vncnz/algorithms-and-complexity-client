@@ -48,3 +48,26 @@ def prim_maze(rows, cols):
     # print(tree)
 
     return maze, tree
+
+def build_path (start, end, tree):
+    s_path = [start]
+    while True:
+        if s_path[-1] in tree and s_path[-1] != tree[s_path[-1]]:
+            s_path.append(tree[s_path[-1]])
+        else:
+            break
+
+    e_path = [end]
+    while True:
+        if e_path[-1] in tree and e_path[-1] != tree[e_path[-1]]:
+            e_path.append(tree[e_path[-1]])
+        else:
+            break
+
+    idx = -1
+    while idx > -len(s_path) and idx > -len(e_path):
+        if s_path[idx-1] == e_path[idx-1]:
+            idx -= 1
+        else:
+            break
+    return s_path, e_path, s_path[0:idx] + [s_path[idx]] + list(reversed(e_path[0:idx]))

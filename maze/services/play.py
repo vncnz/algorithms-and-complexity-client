@@ -7,7 +7,7 @@ import random
 #from functools import partial
 #print_now = partial(print, flush=True)
 from functools import partial
-from maze_logic import prim_maze
+from maze_logic import prim_maze, build_path
 
 log = print # Rewritten later in __main__
 send = partial(print, flush=True)
@@ -83,6 +83,7 @@ if __name__ == "__main__":
     log(f"Seed for this call to the service: {seed}.\n{m=}, {n=}")
 
     board, tree = prim_maze(m, n)
+    _, _, solution = build_path(0, n*m-1, tree)
 
     game = MazeGameStatus(board, n, start=0, end=m*n-1)
     send(f"game:{game.toJSON()}")
@@ -101,7 +102,8 @@ if __name__ == "__main__":
         if cmd == 'exit':
             log("Received exit cmd")
             break
-        if cmd == 'click':
+
+        elif cmd == 'click':
             log(f"Received click cmd with param {i}")
             
             game.apply_move(int(i))
@@ -112,9 +114,34 @@ if __name__ == "__main__":
                 game.status = 'win'
             
             send(f"game:{game.toJSON()}")
+        
+        elif cmd == 'move':
+            log(f"Received click cmd with param {i}")
+            
+            move_to = None
+            if i == 'N': move_to = game.path[-1] - game.row
+            if i == 'E': move_to = game.path[-1] + 1
+            if i == 'S': move_to = game.path[-1] + game.row
+            if i == 'O': move_to = game.path[-1] - 1
+            if move_to:
+                game.apply_move(move_to)
+                num_moves += 1
+                log(f"Move {num_moves}: {i}")
+                log(game.toJSON())
+                if game.solved():
+                    game.status = 'win'
+                
+                send(f"game:{game.toJSON()}")
 
         elif cmd == 'hint':
             log(f'HINT CALLED m={m} n={n} board={board}')
+            correct_path = []
+            for e1,e2 in zip(game.path, solution):
+                log(f'comparing {e1} and {e2}')
+                if e1 == e2: correct_path.append(e1)
+                else: break
+            game.path = correct_path
+            send(f"game:{game.toJSON()}")
             #solution = solve_lights_out(game.board, log)
             #if solution:
             #    send(f'hint:{flatten_grid(solution)}')
