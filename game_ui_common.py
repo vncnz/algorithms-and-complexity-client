@@ -44,13 +44,13 @@ def read_stdin_line(blocking):
     return None
 
 class GameUI:
-    def __init__(self, gamename):
+    def __init__(self, gamename, width=400, height=400):
         app = QApplication(sys.argv)
         scene = QGraphicsScene()
         view = QGraphicsView(scene)
         label = QLabel()
-        self.drawWidth = 400
-        self.drawHeight = 400
+        self.drawWidth = width
+        self.drawHeight = height
         view.setFixedSize(self.drawWidth, self.drawHeight)
 
         # Layout

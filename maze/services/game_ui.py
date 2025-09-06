@@ -15,7 +15,11 @@ send = partial(print, flush=True)
 from time import sleep
 
 # polygons = []
-colors = [QColor("#99cc99"), QColor("#bbddbb"), QColor("#999999")] # , QColor("#99ff99"), QColor("#cccccc"), QColor("#ffcc77")]
+colors = {
+    "head": QColor("#33ff55"),
+    "end": QColor("#6655dd"),
+    "path": QColor("#00cc99")
+}
 app = None
 
 def process_server_message(line):
@@ -25,7 +29,7 @@ def process_server_message(line):
         if cmd == 'game':
             game = json.loads(data)
             log("proceeding with drawing game board")
-            app.draw(game["board"], game["row"])
+            app.draw(game)
             if game['status'] != 'running':
                 app.update_label(game['status'])
         #elif cmd == 'hint':
@@ -41,7 +45,7 @@ def process_server_message(line):
 class Maze(GameUI):
     def __init__(self):
 
-        super().__init__('Maze')
+        super().__init__('Maze', 800, 600)
         # UI buttons
         btn_exit = QPushButton("Exit")
         btn_exit.clicked.connect(self.exit)
@@ -53,23 +57,27 @@ class Maze(GameUI):
 
         self.polygons = []
 
-    def draw (self, data, ncols):
+    def draw (self, data):
         log(f"Drawing game board")
         # (update_draw if len(polygons) > 0 else first_draw)(data)
         if len(self.polygons) > 0:
-            self.update_draw(data, ncols)
+            self.update_draw(data)
         else:
-            self.first_draw(data, ncols)
+            self.first_draw(data)
     
-    def draw_maze_cell (self, row, column, sz, cell, polygon_defs):
+    def draw_maze_cell (self, idx, ncols, sz, cell, polygon_defs):
         cell_half_size = 2
+        
+        row = int(idx / ncols)
+        column = idx % ncols
 
         x = column * sz * 2
         y = row * sz * 2
+        c = QColor("#000")
         polygon_defs.append((
             [(x-sz, y-sz), (x+sz, y-sz), (x+sz, y+sz), (x-sz, y+sz)],
-            QColor("#bbddbb") if (row % 2 - column % 2) else QColor("#b0ddbb"),
-            f"{row}_{column}"
+            c,
+            f"{idx}"
         ))
         if cell['N']:
             polygon_defs.append((
@@ -96,27 +104,45 @@ class Maze(GameUI):
                 f"{row}_{column}_W"
             ))
 
-    def first_draw (self, board, ncols):
+    def first_draw (self, data):
+        board = data["board"]
+        ncols = data["row"]
         sz = min(30, int((self.drawWidth - 4)/ ncols / 2))
         log(f'sz:{sz} drawWidth:{self.drawWidth} ncols:{ncols}')
         polygon_defs = []
         for idx, cell in enumerate(board):
-            row = int(idx / ncols)
-            column = idx % ncols
-            log(f'drawing {idx} at {column},{row}')
-            self.draw_maze_cell(row, column, sz, cell, polygon_defs)
+            # log(f'drawing {idx} at {column},{row}')
+            self.draw_maze_cell(idx, ncols, sz, cell, polygon_defs)
 
         for (points, color, id) in polygon_defs:
             poly = ClickablePolygon(id, points, color, onclick=self.onclick)
             self.scene.addItem(poly)
             self.polygons.append(poly)
+        
+        self.update_draw(data)
 
-    def update_draw (self, board, _):
-        for row in range(len(board)):
-            for column in range(len(board[row])):
-                c = colors[board[row][column]]
-                poly = next(filter(lambda x: x.id == f'{row}_{column}', self.polygons))
-                poly.update_color(c)
+    def update_draw (self, game):
+        board = game["board"]
+        path = game["path"]
+        end = game["end"]
+        for idx in range(len(board)):
+            row = int(idx / game["row"])
+            column = idx % game["row"]
+            c = self.cell_color(row, column, idx, path, end)
+            if c:
+                try:
+                    poly = next(filter(lambda x: x.id == f'{idx}', self.polygons))
+                    poly.update_color(c)
+                    log(f'Color updated for obj with id {idx}')
+                except Exception as ex:
+                    log(f'Exception updating color for obj with id {idx}: {ex}')
+            else:
+                log(f'NO_COLOR for obj with id {idx}')
+    
+    def cell_color (self, row, col, idx, path, end):
+        if idx in path: return colors['path'] if idx != path[-1] else colors['head']
+        elif idx == end: return colors['end']
+        return QColor("#bbddbb") if (row % 2 - col % 2) else QColor("#b0ddbb")
     
     def onclick (self, id):
         log(f'Clicked {id}')
