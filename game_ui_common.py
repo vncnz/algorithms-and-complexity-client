@@ -4,7 +4,7 @@ import select
 
 from PyQt5.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPolygonItem, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLabel
 from PyQt5.QtGui import QPolygonF, QBrush, QColor, QPainter
-from PyQt5.QtCore import QPointF, QTimer
+from PyQt5.QtCore import QPointF, QTimer, Qt, QEvent, QObject
 
 from functools import partial
 print_now = partial(print, flush=True)
@@ -43,6 +43,17 @@ def read_stdin_line(blocking):
             return sys.stdin.readline()
     return None
 
+class KeyFilter(QObject):
+    def __init__(self, callback):
+        super().__init__()
+        self.callback = callback
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            self.callback(event)
+            return True  # consumato
+        return False
+
 class GameUI:
     def __init__(self, gamename, width=400, height=400):
         app = QApplication(sys.argv)
@@ -65,11 +76,27 @@ class GameUI:
         window = QWidget()
         window.setLayout(layout)
         window.setWindowTitle(gamename)
+        window.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         self.window = window
         self.app = app
         self.scene = scene
         self.label = label
+
+        # self.keyFilter = KeyFilter(lambda e: print("Key pressed:", e.key()))
+        # self.app.installEventFilter(self.keyFilter)
+    
+    def setOnKeyEvent (self, onKeyEvent):
+        # self.window.keyPressEvent = onKeyEvent
+        self.keyFilter = KeyFilter(onKeyEvent)
+        self.app.installEventFilter(self.keyFilter)
+    
+    def setOnClose(self, onClose):
+        def handler(event):
+            try: onClose()
+            except: pass
+            event.accept()
+        self.window.closeEvent = handler
     
     def add_buttons (self, buttons):
         for btn in buttons:
